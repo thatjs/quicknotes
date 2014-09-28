@@ -1,0 +1,96 @@
+/* Copyright (C) ThatJs, 2014
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Original Publication Date: July 19, 2002
+ */
+
+$ chkconfig
+
+RHEL uses the chkconfig utility to manage server applications designed to persist through server restarts.
+
+Overview:
+
+1. Create the bash shell script for the service (daemon).
+   a) Configure the comment with chkconfig parameters
+2. Symlink the script to the init.d directory.
+   a) Set the run levels.
+3. Call the service.
+
+1. Create the bash script:
+--------------------------
+
+$ mkdir -p /home/{user}/scripts
+$ cd /home/{user}/scripts
+$ vi devkit
+
+#!/bin/bash
+#
+# chkconfig: 345 99 00
+# description: devkit
+# process name: devkit
+#  order of daemons is important
+
+RETVAL=0
+prog=devkit
+
+start ( ) {
+  echo -n $"Starting $prog:"
+  echo
+  /sbin/service named start
+  /sbin/service mysqld start
+  /sbin/service httpd start
+  RETVAL=$?
+  echo
+  return $RETVAL
+}
+
+stop ( ) {
+  echo -n $"Stopping $prog:"
+  echo
+  /sbin/service named stop
+  /sbin/service mysqld stop
+  /sbin/service httpd stop
+  RETVAL=$?
+  echo
+  return $RETVAL
+}
+
+status ( ) {
+  netstat -plnt | grep httpd
+}
+
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  status)
+    status
+    ;;
+  restart)
+    stop
+    start
+    ;;
+*)
+  echo $"Usage: $0 {start|stop|restart|status}"
+  exit 1
+esac
+exit $RETVAL
+
+:wq
+
+2. Symlink the script:
+----------------------
+
+$ cd /etc/rc.d/init.d/
+# ln -s /home/{user}/scripts/devkit devkit
+# /sbin/chkconfig --level 345 devkit on
+#  /sbin/chkconfig --list devkit
+devkit 0:off 1:off 2:on 3:on 4:on 5:on 6:off
+
+3. Call the service:
+--------------------
+
+# /sbin/service devkit start|stop|restart|status
