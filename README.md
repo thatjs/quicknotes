@@ -1,4 +1,4 @@
 quicknotes
 ==========
 
-Documentation
+A lifetime of documentation.
