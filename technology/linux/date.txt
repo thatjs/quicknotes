@@ -1,0 +1,15 @@
+/* Copyright (C) ThatJs, 2014
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Original Publication Date: June 28, 2002
+ */
+
+$ date [option] [format]
+
+Print or set the date. The simplest format for setting the date is MMDDhhmmYY.
+
+# date 0930084814
+
+$ date
+Tue Sep 30 08:48:09 CST 2014
+
