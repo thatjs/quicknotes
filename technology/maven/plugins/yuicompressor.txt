@@ -1,0 +1,60 @@
+/* Copyright (C) ThatJs, 2014
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Original Publication Date: Oct 4, 2014
+ */
+
+Documented plugins listed here work perfectly well together, however conflicts with other plugins may occur. Check for newer versions of plugins if there are errors when building.
+
+Maven plugin for compiling and aggregating Javascript using Yahoo's yuicompressor library.
+
+This plugin will compress Javascript files and generate compressed files that have the -min.js file extension.If the aggregation targets are not specified the plugin will simply compress all Javascript files it finds. It is important to exclude any library files and files that are not needed for execution. Each aggregation section specifies an output file and the collection of source files.
+
+<plugin>
+    <groupId>net.alchim31.maven</groupId>
+    <artifactId>yuicompressor-maven-plugin</artifactId>
+    <version>1.3.0</version>
+    <configuration>
+        <excludes>
+            <exclude>**/lib/**/*.*</exclude>
+            <exclude>**/js/ref/**/*.*</exclude>
+        </excludes>
+        <aggregations>
+            <aggregation>
+                <insertNewLine>true</insertNewLine>
+                <output>${project.basedir}/src/main/webapp/js/out/that.js</output>
+                <includes>
+                    <include>${project.basedir}/src/main/webapp/js/thatjs/main/app.js</include>
+                    <include>${project.basedir}/src/main/webapp/js/thatjs/directives/navbar.js</include>
+                    <include>${project.basedir}/src/main/webapp/js/thatjs/directives/quickNotes.js</include>
+                </includes>
+            </aggregation>
+
+            <aggregation>
+                <output>${project.basedir}/src/main/webapp/js/out/that-min.js</output>
+                <includes>
+                    <include>${target.finalName}/js/thatjs/main/app-min.js</include>
+                    <include>${target.finalName}/js/thatjs/directives/navbar-min.js</include>
+                    <include>${target.finalName}/js/thatjs/directives/quickNotes-min.js</include>
+                </includes>
+            </aggregation>
+
+            <aggregation>
+                <output>${project.basedir}/src/main/webapp/css/that.css</output>
+                    <includes>
+                    <include>${target.finalName}/css/thatjs.css</include>
+                </includes>
+            </aggregation>
+        </aggregations>
+    </configuration>
+
+    <executions>
+        <execution>
+            <id>compile-js-css</id>
+            <phase>process-resources</phase>
+            <goals>
+                <goal>compress</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>

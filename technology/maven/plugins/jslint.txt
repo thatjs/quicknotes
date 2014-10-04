@@ -1,0 +1,58 @@
+/* Copyright (C) ThatJs, 2014
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Original Publication Date: Oct 4, 2014
+ */
+
+Documented plugins listed here work perfectly well together, however conflicts with other plugins may occur. Check for newer versions of plugins if there are errors when building.
+
+Jslint is code sanity for Javascript.
+
+Rules are strict for application coding and I consider these to be a good starting point. Rules should be adjusted for the team or project.
+
+Plugin will run during compile and install phase, or individual goal:
+
+$ mvn jslint4java:lint
+
+<plugin>
+    <groupId>com.googlecode.jslint4java</groupId>
+    <artifactId>jslint4java-maven-plugin</artifactId>
+    <version>2.0.3</version>
+    <configuration>
+        <failOnError>true</failOnError>
+        <options>
+            <predef>angular,describe,it,xdescribe,xit,beforeEach,afterEach,expect</predef>
+            <browser>true</browser>
+            <maxlen>150</maxlen>
+            <todo>true</todo>  <!-- Allow 'todo' comments in code -->
+            <continue>true</continue>  <!-- allow use of continue in loops -->
+
+            <!-- To match recommended IDE settings in coding standards -->
+            <sloppy>true</sloppy>  <!-- Don't require 'strict' -->
+            <nomen>true</nomen>  <!-- Don't check names (allow trailing underscores, etc) -->
+            <vars>true</vars>  <!-- Allow multiple var statements per functon -->
+            <plusplus>true</plusplus>  <!-- Allow increment/decrement operators -->
+            <regexp>true</regexp>  <!-- the . should be allowed in regexp literals -->
+        </options>
+        <sourceFolders>
+            <sourceFolder>src/main/webapp/js</sourceFolder>
+            <sourceFolder>src/test/js</sourceFolder>
+        </sourceFolders>
+        <excludes>
+            <exclude>lib/**/*.js</exclude>
+            <exclude>ref/**/*.js</exclude>
+            <exclude>**/*min.js</exclude>
+        </excludes>
+        <outputFolder>target/jslint</outputFolder>
+        <timeout>30</timeout>
+    </configuration>
+    <executions>
+        <execution>
+            <id>lint</id>
+            <phase>process-resources</phase>
+            <goals>
+                <goal>lint</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>

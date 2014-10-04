@@ -1,0 +1,35 @@
+/* Copyright (C) ThatJs, 2014
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Original Publication Date: Oct 4, 2014
+ */
+
+Documented plugins listed here work perfectly well together, however conflicts with other plugins may occur. Check for newer versions of plugins if there are errors when building.
+
+Maven plugin for compiling css using lesscss.org library.
+
+<plugin>
+    <groupId>org.lesscss</groupId>
+    <artifactId>lesscss-maven-plugin</artifactId>
+    <version>1.3.3</version>
+    <configuration>
+        <sourceDirectory>${project.basedir}/src/main/webapp/less</sourceDirectory>
+        <outputDirectory>${target.finalName}/css</outputDirectory>
+        <compress>false</compress>
+        <force>true</force>
+        <concatenate>true</concatenate>
+        <!-- <includes> -->
+            <!-- <include>main.less</include> -->
+        <!-- </includes> -->
+        <excludes>
+            <exclude>layout.less</exclude>
+        </excludes>
+    </configuration>
+    <executions>
+        <execution>
+            <goals>
+                <goal>compile</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
