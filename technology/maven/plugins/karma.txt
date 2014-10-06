@@ -1,0 +1,39 @@
+/* Copyright (C) ThatJs, 2014
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Original Publication Date: Oct 6, 2014
+ */
+
+This plugin is a work in progress with a dependency on Nodejs. 
+
+- todo: - example karma.conf.js, quicknote on installing nodejs using project's package.json file.
+
+$ mvn clean test
+
+<plugin>
+    <groupId>com.kelveden</groupId>
+    <artifactId>maven-karma-plugin</artifactId>
+    <version>1.6</version>
+    <executions>
+        <execution>
+            <phase>test</phase>
+            <goals>
+                <goal>start</goal>
+            </goals>
+        </execution>
+    </executions>
+    <configuration>
+        <configFile>karma.conf.js</configFile>
+        <!-- <junitReportFile>src/main/webapp/resources/test-results.xml</junitReportFile> -->
+        <junitReportFile>src/test/resources/test-results.xml</junitReportFile>
+        <reportsDirectory>${project.build.directory}/karma-reports</reportsDirectory>
+        <browsers>PhantomJS</browsers>
+        <autoWatch>false</autoWatch>
+        <singleRun>true</singleRun>
+        <colors>true</colors>
+        <!-- <skipKarma>true</skipKarma>   skip for now -->
+        <!-- <skipTests>true</skipTests>   skip for now -->
+        <karmaFailureIgnore>false</karmaFailureIgnore>
+        <reporters>junit,dots</reporters>
+    </configuration>
+</plugin>
