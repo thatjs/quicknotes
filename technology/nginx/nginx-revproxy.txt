@@ -1,0 +1,56 @@
+/* Copyright (C) ThatJs, 2014
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Original Publication Date: October 11, 2014
+ */
+
+# Server start
+# cd /path/lib/nginx
+# nginx -c conf/nginx-revproxy.conf
+#
+# Server stop - kill both nginx instances before restarting server
+
+worker_processes  1;
+events {
+    worker_connections  1024;
+}
+
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    sendfile        on;
+    keepalive_timeout  65;
+
+    server {
+        listen       9020;
+        server_name  localhost;
+
+
+        location /services/ {
+            rewrite /services/(.*)$ /api/$1  break;
+
+            # required headers
+            proxy_set_header    orgid 8f057cf9-93ab-4258-a3f7-20d89a2b401b;
+            proxy_set_header    userid 0abd4710-6902-4a64-acec-e0b59207d784;
+
+            proxy_pass   http://127.0.0.1:9000;
+
+        }
+
+        # versioned static urls
+        location /static/ {
+            rewrite /static/.*/css/(.*)$ /css/$1  break;
+            proxy_pass   http://127.0.0.1:9028;
+        }
+
+        location / {
+            root /;
+            index  index.html index.htm;
+            proxy_pass   http://127.0.0.1:9028;
+        }
+
+    }
+
+}
