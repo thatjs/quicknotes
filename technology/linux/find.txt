@@ -1,0 +1,20 @@
+/* Copyright (C) ThatJs, 2014
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Original Publication Date: Oct 19, 2014
+ */
+
+Linux Bash shell find command for working with files.
+
+
+$ find . -name "*.zip" -exec mv {} ./archive \;
+
+Move all of the .zip files into the archive directory:
+
+
+$ find . -maxdepth 1 -name "*.js" -exec cp -t {} /pub/git/thatjs/js/lib/ \;
+
+Copy all of the .js files to the lib directory.
+
+  -maxdepth 1 - limit search to current directory, remove for all child directories.
+
