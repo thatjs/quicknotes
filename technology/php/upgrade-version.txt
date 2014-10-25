@@ -1,0 +1,54 @@
+/* Copyright (C) ThatJs, 2014
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Original Publication Date: Jul 19, 2007
+ */
+
+Upgrade php-4.4.8 to php-5.2.10 on development server.
+
+Dependencies: Apache 2.2.8+, Mysql 5.1.24+
+Option dependencies: Bind 9.3+
+
+
+$ cd /usr/local/src/php-5.2.10
+
+$ ./configure
+  --with-apxs2=/usr/local/apache2/bin/apxs
+  --with-mysql=/usr/lib/mysql
+  --with-zlib
+  --enable-exif
+
+$ make
+$ make test
+
+# make install
+# /sbin/ldconfig
+
+$ cd /usr/local/apache2/conf
+$ vi httpd.conf
+
+LoadModule php5_module libexec/libphp5.so
+
+(make sure php4 is commented out and php is the first module in the list)
+
+$ cd /usr/local/zend/zendPlatform-3.6.2/etc
+# cp /usr/local/src/php-5.2.10/php.ini-dist .
+# mv php.ini-dist php.ini.5.2.10
+
+(open old php.ini in notepad and copy [zend] section)
+
+# vi php.ini.5.2.10
+(scroll to bottom and paste [zend] section,
+ :wq)
+
+# cp php.ini.5.2.10 php.ini
+
+# /sbin/service apachectl restart
+
+Test local website/web application:
+
+  localhost/my-web-app.html (without bind running)
+
+  www.my-web-app.domain (with bind running)
+
+Verify test.php executes phpinfo(); and dumps server configuration to browser.

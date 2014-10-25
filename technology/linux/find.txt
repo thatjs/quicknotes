@@ -9,7 +9,7 @@ Linux Bash shell find command for working with files.
 
 $ find . -name "*.zip" -exec mv {} ./archive \;
 
-Move all of the .zip files into the archive directory:
+Move all of the .zip files into the archive directory.
 
 
 $ find . -maxdepth 1 -name "*.js" -exec cp -t {} /pub/git/thatjs/js/lib/ \;

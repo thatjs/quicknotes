@@ -1,0 +1,22 @@
+/* Copyright (C) ThatJs, 2014
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Original Publication Date: Jul 20, 2002
+ */
+
+Linux Bash shell scp command for secure transfering of files. Assumes you have ssh permission on source and destination machines.
+
+
+$ scp username@remotehost:/path/to/remote/source/file /path/to/local/destination/file
+
+$ scp remote-file local-file
+
+Download files into the local machine.
+
+
+$ scp /path/to/local/source/file username@remotehost:/path/to/remote/destination/file
+
+$ scp local-file remote-file
+
+Upload files into the remote machine.
+

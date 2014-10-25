@@ -1,0 +1,26 @@
+/* Copyright (C) ThatJs, 2014
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Original Publication Date: Jul 20, 2002
+ */
+
+Linux Bash shell ssh command for secure machine access.
+
+
+$ ssh remotehost
+<pass-phrase>
+
+Access machine.
+
+
+$ ssh -l username remotehost
+$ ssh username@remotehost
+<pass-phrase>
+
+Access machine using a different username than bash session.
+
+
+$ ssh username@remotehost ls -l /usr/share/doc
+<pass-phrase>
+
+Execute command on machine without actually logging in.
