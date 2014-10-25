@@ -4,7 +4,7 @@
  * Original Publication Date: Jul 19, 2007
  */
 
-Upgrade php-4.4.8 to php-5.2.10 on development server.
+Linux upgrade php-4.4.8 to php-5.2.10 on development server.
 
 Dependencies: Apache 2.2.8+, Mysql 5.1.24+
 Option dependencies: Bind 9.3+

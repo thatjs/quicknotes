@@ -1,0 +1,28 @@
+/* Copyright (C) ThatJs, 2014
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Original Publication Date: Oct 25, 2014
+ */
+
+Assumes local git repository and upstream shared repository.
+
+Everyday git commands:
+
+$ git add file(s)
+$ git commit -m "project - issue - commit message"
+$ git remote update
+$ git rebase
+
+$ git push or $ git push origin master  (push to master, or push to branch)
+
+
+
+Useful git aliases:
+
+$ git st    $ git config --global alias.st 'status'
+$ git sp    $ git config --global alias.sp 'stash pop stash@{0}'
+
+$ git config --list
+...
+alias.st=status
+alias.sp=stash pop stash@{0}
