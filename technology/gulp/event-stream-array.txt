@@ -1,0 +1,69 @@
+/* Copyright (C) ThatJs, 2015
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Original Publication Date: Mar 7, 2015
+ */
+
+Gulp operates on a collection of files. Typically using a glob pattern like 'templates/**/*.css', where
+all Css files are operated on inside the 'templates' directory. In most common use cases this is
+exactly what is needed, but how do we handle file streams generated from templates?
+
+To run this example, copy the npm dependencies to your package.json file and add the Gulp variables
+and tasks to your gulpfile.js file.
+
+$ npm install
+$ gulp
+
+gulpfile.js
+
+var gulp = require('gulp'),
+    concat = require('gulp-concat'),
+    es = require('event-stream'),
+    replace = require('gulp-token-replace');
+
+var webapp = 'src/main/webapp',
+    path = {
+        css: webapp + '/css',
+        js: webapp + '/js',
+        build: 'target/build'
+    };
+
+var config = {
+    themes: [
+        { name: 'red', basecolor: 'ff0000', headercolor: 'ff8383' },
+        { name: 'green', basecolor: '6bff2c', headercolor: '88ff78' },
+        { name: 'blue', basecolor: '022cff', headercolor: '617eff' }
+    ]
+};
+
+gulp.task('build-css', function () {
+
+    var themes = config.themes,
+
+        themeStream = themes.map(function(theme) {
+            return gulp.src(path.css + '/templates/theme.css')
+                .pipe(replace({
+                    prefix: '$$',
+                    suffix: '$$',
+                    tokens: theme
+                }))
+                .pipe(gulp.dest(path.build + '/theme/' + theme.name + '.css'))
+
+        };
+
+    return es.concat.apply(null, themeStream);
+});
+
+gulp.task('default', ['build-css']);
+
+
+src/main/webapp/css/templates/theme.css
+
+.header {
+    background-color: #$$headercolor$$;
+    color: #$$basecolor$$;
+}
+
+.page {
+    color: #$$basecolor$$;
+}
