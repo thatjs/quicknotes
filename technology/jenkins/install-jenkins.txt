@@ -1,0 +1,174 @@
+/* Copyright (C) ThatJs, 2015
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Original Publication Date: December 22, 2015
+ */
+
+Installing Jenkins on CentOS (Linux) box:
+
+Install directory:
+
+/usr/local/src
+/usr/local/src/archive
+
+============================================
+
+- use yum whenever possible to upgrade components
+
+# yum update (takes a long time)
+
+Install Java 7
+
+# yum install java-1.7.0-openjdk-devel
+# java -version
+java version "1.7.0_91"
+OpenJDK Runtime Environment (rhel-2.6.2.2.el6_7-x86_64 u91-b00)
+OpenJDK 64-Bit Server VM (build 24.91-b01, mixed mode)
+
+Install zlib-devel
+
+# yum install zlib-devel
+
+============================================
+
+Install Jenkins
+
+# cd /etc/yum.repos.d/
+
+# wget -o /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat/jenkins.repo
+# rpm --import https://jenkins-ci.org/redhat/jenkins-ci.org.key
+# yum install jenkins
+
+# cd /etc/rc.d/init.d
+# ls -l | grep jenkins
+
+# /sbin/chkconfig --list | grep jenkins
+# /sbin/chkconfig --level 345 jenkins on
+
+Jenkins gets installed to: /var/lib/jenkins
+
+============================================
+
+Install Python 2.7.10
+
+# yum install centos-release-SCL
+# yum install python27
+# scl enable python27 bash (allows switching python in xterm)
+
+Test Python version:
+# python
+Python 2.7.5 (default, Jul 10 2014, 16:10:08)
+[GCC 4.4.7 20120313 (Red Hat 4.4.7-4)] on linux2
+
+============================================
+
+Install Git dependencies
+
+# yum install curl-devel
+
+Install Git
+
+# cd /usr/local/src
+# wget https://www.kernel.org/pub/software/scm/git/git-2.6.3.tar.gz
+# tar -zxvf git-2.6.3.tar.gz
+# mv git-2.6.3.tar.gz archive
+# cd git-2.6.3
+
+# ./configure
+# make
+# make install
+
+# git --version
+git version 2.5.1
+
+============================================
+
+Install epel package to allow yum to install nodejs
+
+# wget http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+# rpm -ivh epel-release-6-8.noarch.rpm --test
+** Error key not installed **
+
+# cd
+# wget https://fedoraproject.org/static/0608B895.txt
+# mv 0608B895.txt /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6
+# rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6
+
+Verify key got installed
+# rpm -qa gpg*
+
+# cd /usr/local/src
+# rpm -ivh epel-release-6-8.noarch.rpm
+
+# yum repolist
+epel            Extra packages for Enterprise Linux 6 - x86_64
+
+============================================
+
+Install NodeJs (must install stable branch 4.2.1+)
+
+Do not install NodeJs via yum, need to compile from source.
+
+# curl http://linuxsoft.cern.ch/cern/scl/slc6-scl.repo > /etc/yum.repos.d/slc6-scl.repo
+# rpm --import http://ftp.mirrorservice.org/sites/ftp.scientificlinux.org/linux/scientific/51/i386/RPM-GPG-KEYs/RPM-GPG-KEY-cern
+# yum install -y devtoolset-3
+
+# scl enable devtoolset-3 bash
+
+# cd /usr/local/src
+# wget http://nodejs.org/dist/v4.2.2/node-v4.2.2.tar.gz
+# tar -zxvf node-v4.2.2.tar.gz
+# mv node-v4.2.2.tar.gz archive
+# cd node-v4.2.2
+
+# ./configure
+# make
+# make install
+
+
+Node gets installed at:
+/usr/local/lib/node_modules/npm
+
+# node --version
+v4.2.2
+
+# npm --version
+2.14.7
+
+============================================
+
+Install Apache Maven (for npm maven-deploy)
+(** if building Maven projects, let Jenkins install Maven **)
+
+# cd /usr/local/src
+# wget http://mirrors.gigenet.com/apache/maven/maven-3/3.3.3/binaries/apache-maven-3.3.3-bin.tar.gz
+# tar -zxvf apache-maven-3.3.3-bin.tar.gz
+
+# mv apache-maven-3.3.3-bin.tar.gz archive
+
+# cd /usr/bin
+# ln -s /usr/local/src/apache-maven-3.3.3/bin/mvn mvn
+
+// see configuration file about adding settings.xml to the .m2 folder
+
+============================================
+
+Configure Jenkins Dependencies
+
+# cd /usr/bin
+# ln -s /usr/local/bin/node node
+# ln -s /usr/local/bin/npm npm
+
+# npm install -g gulp
+
+# ls -l /usr/bin/gulp
+ls: cannot access /usr/bin/gulp: No such file or directory
+
+# cd /usr/bin
+# ln -s /usr/local/bin/gulp gulp
+
+============================================
+
+Controlling Jenkins Process
+
+# /sbin/service jenkins start | stop | status
