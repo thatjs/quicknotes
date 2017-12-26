@@ -1,0 +1,67 @@
+/* Copyright (C) ThatJs, 2017
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Date: Dec 25, 2017
+ */
+
+Firefox
+
+Install latest version of browser and make it available for all users
+
+
+1. One time setup
+-----------------
+
+$ mkdir -p /home/{user}/local/src
+$ cd /home/{user}/local/src
+
+// optional, but useful when restoring old systems
+$ mkdir archive
+
+
+2. Remove automatic update of system installed browser
+------------------------------------------------------
+On systems like RHEL and Centos, during the operating system installation a default browser gets installed
+and if you have automatic updates enabled, this will overwrite your locally installed version. To prevent this, you
+should uninstall the default browser.
+
+$ which firefox
+/usr/bin/firefox (binary)
+
+$ rpm -qa | grep firefox
+firefox-52.5.1-1.el7.centos.x86_64
+$ su
+
+# rpm -e firefox-52.5.1-1.el7.centos.x86_64
+# exit
+
+$ rpm -qa | grep firefox
+<no results>
+
+
+3. Download and expand new version
+----------------------------------
+
+$ cd /home/{user}/local/src
+$ wget http://ftp.mozilla.org/pub/firefox/releases/57.0/linux-x86_64/en-US/firefox-57.0.tar.bz2
+$ tar -xvjf firefox-57.0.tar.bz2
+$ mv firefox firefox-57
+
+// optional - archive the tar file
+$ mv firefox-57.0.tar.bz2 archive/
+
+
+4. Expose the application via symbolic link
+-------------------------------------------
+
+$ su
+# cd /usr/bin
+
+// if an older version exists, rename it
+# mv firefox firefox-{old_version}
+# ln -s /home/{user}/local/src/firefox-57/firefox firefox
+# exit
+
+$ firefox --version
+Mozilla Firefox 57.0.1
+

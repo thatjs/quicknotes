@@ -6,7 +6,7 @@
 
 $ chkconfig
 
-RHEL uses the chkconfig utility to manage server applications designed to persist through server restarts.
+RHEL4-5 uses the chkconfig utility to manage server applications designed to persist through server restarts.
 
 Overview:
 
