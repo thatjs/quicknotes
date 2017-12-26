@@ -1,0 +1,94 @@
+/* Copyright (C) ThatJs, 2017
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Original Publication Date: December 25, 2017
+ */
+
+Centos 7 Custom Application Launcher
+
+After adding new software to the Centos 7 system, you need to expose the applicaiton to make it available in the
+"Activities Overview" section of the Applications configuration.
+
+
+1. Add new desktop entry
+------------------------
+
+$ su
+
+# cd /usr/share/applications
+# vi firefox.desktop
+
+[Desktop Entry]
+Version=57.0
+Name=Firefox
+Comment=Firefox 57
+Exec=/usr/bin/firefox
+Icon=/usr/bin/firefox-icon.png
+Terminal=false
+Type=Application
+StartupNotify=true
+Categories={custom};Network;WebBrowser;
+
+esc + :wq
+
+
+2. Configure the application in favorites
+-----------------------------------------
+
+Click Applications -> Activities Overview
+Click the 9 dots (show applications)
+Search for 'firefox'
+Right click -> Add to Favorites
+
+
+Add custom menu to Applications
+-------------------------------
+To organize your applications, create custom folders in the applications menu.
+
+
+1. Create the .menu configuration file
+--------------------------------------
+
+$ su
+
+# cd /etc/xdg/menus/applications-merged
+# vi {custom}.menu
+
+<!DOCTYPE Menu PUBLIC "-//freedesktop//DTD Menu 1.0//EN"
+ "http://www.freedesktop.org/standards/menu-spec/1.0/menu.dtd">
+<Menu>
+  <Name>Applications</Name>
+  <Menu>
+    <Name>Custom</Name>
+    <Directory>Custom.directory</Directory>
+    <Include>
+        <Category>Custom</Category>
+    </Include>
+  </Menu> <!-- End custom -->
+</Menu>
+
+
+2. Create the .directory configuration file
+-------------------------------------------
+
+$ su
+
+# cd /usr/share/desktop-directories
+# vi {custom}.directory
+
+[Desktop Entry]
+Type=Directory
+Encoding=UTF-8
+Name={custom}
+
+
+3. Update any .desktop files to add your directory
+--------------------------------------------------
+
+# cd /usr/share/applications
+# vi google-chrome.desktop
+
+Update Categories:
+Categories={custom};Network;WebBrowser
+
+// after saving, this application will be available under the custom menu

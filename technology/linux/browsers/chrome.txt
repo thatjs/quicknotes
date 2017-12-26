@@ -52,7 +52,7 @@ $ su
 # vi google-chrome.desktop
 
 Update Categories:
-Catigories={custom};Network;WebBrowser
+Categories={custom};Network;WebBrowser
 
 esc + :wq
 
