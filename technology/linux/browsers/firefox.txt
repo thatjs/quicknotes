@@ -4,7 +4,7 @@
  * Date: Dec 25, 2017
  */
 
-Firefox
+Firefox Browser
 
 Install latest version of browser and make it available for all users
 

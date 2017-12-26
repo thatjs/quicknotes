@@ -1,7 +1,7 @@
 /* Copyright (C) ThatJs, 2014
  *
  * Author: Andrew Schoenherr <dev@thatjs.com>
- * Original Publication Date: Oct 25, 2014
+ * Date: Oct 25, 2014
  */
 
 Assumes local git repository and upstream shared repository.
@@ -10,8 +10,7 @@ Everyday git commands:
 
 $ git add file(s)
 $ git commit -m "project - issue - commit message"
-$ git remote update
-$ git rebase
+$ git pull --rebase origin master
 
 $ git push or $ git push origin master  (push to master, or push to branch)
 
@@ -26,3 +25,9 @@ $ git config --list
 ...
 alias.st=status
 alias.sp=stash pop stash@{0}
+
+One Time Setup
+--------------
+
+$ git config --global user.name "{unique-id}"
+$ git config --global user.email "{unique-email}"

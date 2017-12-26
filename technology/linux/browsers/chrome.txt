@@ -1,0 +1,65 @@
+/* Copyright (C) ThatJs, 2017
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Date: Dec 25, 2017
+ */
+
+Chrome Browser
+
+Install latest version of browser and make it available for all users
+
+
+1. One time setup
+-----------------
+
+$ mkdir -p /home/{user}/local/src
+$ cd /home/{user}/local/src
+
+// optional, but useful when restoring old systems
+$ mkdir archive
+
+
+2. Download lastest rpm
+-----------------------
+
+$ cd
+$ wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm
+$ su
+
+# yum install google-chrome-stable_current_x86_64.rpm
+# cd /usr/bin
+# ls -la | grep chrome
+lrwxrwxrwx.   1 root root    31 Dec 25 18:02 google-chrome -> /etc/alternatives/google-chrome
+lrwxrwxrwx.   1 root root    32 Dec 25 18:02 google-chrome-stable -> /opt/google/chrome/google-chrome
+# exit
+
+$ google-chrome-stable --version
+Google Chrome 63.0.3239.108
+
+
+// clean up of install artifact
+$ cd
+$ mv google-chrome-stable_current_x86_64.rpm google-chrome-stable_63_x86_64.rpm
+$ mv google-chrome-stable_63_x86_64.rpm /home/{user}/local/src/archive/
+
+
+# 3. Add to custom application menu
+-----------------------------------
+
+$ su
+
+# cd /usr/share/applications
+# vi google-chrome.desktop
+
+Update Categories:
+Catigories={custom};Network;WebBrowser
+
+esc + :wq
+
+
+
+
+
+
+
+
