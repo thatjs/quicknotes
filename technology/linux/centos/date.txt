@@ -1,0 +1,18 @@
+/* Copyright (C) ThatJs, 2017
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Date: December 27, 2017
+ */
+
+Centos 7 Setting the desktop date and synchronizing with the hardware clock.
+
+After calling the date command, and rebooting the system, the date is reverting to a default.
+
+
+1. Set date and synchronize with hardware clock
+-----------------------------------------------
+
+$ su
+
+# date mmddhhssyy
+# hwclock --utc --systohc
