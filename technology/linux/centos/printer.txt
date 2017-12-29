@@ -1,0 +1,17 @@
+/* Copyright (C) ThatJs, 2017
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Date: December 29, 2017
+ */
+
+ Installing HP OfficeJet 4500 printer on Centos 7
+
+ Applications -> Activities Overview -> Settings -> Printers
+
+ Add Printer (su)
+ 192.168.2.12 -> select: Officejet-4500-G510g-m
+
+  - most default settings
+  - output = high quality grey scale
+
+Print test page - !!Success!!
