@@ -4,7 +4,7 @@
  * Date: December 29, 2017
  */
 
- Installing HP OfficeJet 4500 printer on Centos 7
+ Installing HP Officejet 4500 printer on Centos 7
 
  Applications -> Activities Overview -> Settings -> Printers
 
@@ -15,3 +15,13 @@
   - output = high quality grey scale
 
 Print test page - !!Success!!
+
+Media Limits: 0.12 x 0.12 to 8.38 x 10.88 inches
+Job ID: Officejet-4500-G510g-m-1
+Driver: hp-officejet_4500_g510g-m.ppd
+Driver Version: 3.15.9
+Description: Officejet 4500 G510g-m
+Driver Version: Officejet 4500 G510g-m
+Make and Model: HP Officejet 4500 g510g-m, hpcups 3.15.9
+Printer: Officejet-4500-G510g-m
+
