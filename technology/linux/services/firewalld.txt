@@ -1,0 +1,88 @@
+/* Copyright (C) ThatJs, 2018
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Date: March 22, 2018
+ */
+
+Firewall Service on Centos7
+
+# systemctl status firewalld -l
+● firewalld.service - firewalld - dynamic firewall daemon
+   Loaded: loaded (/usr/lib/systemd/system/firewalld.service; enabled; vendor preset: enabled)
+   Active: active (running) since Thu 2018-03-22 09:09:41 PDT; 5min ago
+     Docs: man:firewalld(1)
+ Main PID: 1030 (firewalld)
+   CGroup: /system.slice/firewalld.service
+           └─1030 /usr/bin/python -Es /usr/sbin/firewalld --nofork --nopid
+
+Mar 22 09:09:39 machine.name systemd[1]: Starting firewalld - dynamic firewall daemon...
+Mar 22 09:09:41 machine.name systemd[1]: Started firewalld - dynamic firewall daemon.
+
+** Need to understand why these warnings are happening **
+Mar 22 09:09:42 machine.name firewalld[1030]: WARNING: ICMP type 'beyond-scope' is not supported by the kernel for ipv6.
+Mar 22 09:09:42 machine.name firewalld[1030]: WARNING: beyond-scope: INVALID_ICMPTYPE: No supported ICMP type., ignoring for run-time.
+Mar 22 09:09:42 machine.name firewalld[1030]: WARNING: ICMP type 'failed-policy' is not supported by the kernel for ipv6.
+Mar 22 09:09:42 machine.name firewalld[1030]: WARNING: failed-policy: INVALID_ICMPTYPE: No supported ICMP type., ignoring for run-time.
+Mar 22 09:09:42 machine.name firewalld[1030]: WARNING: ICMP type 'reject-route' is not supported by the kernel for ipv6.
+Mar 22 09:09:42 machine.name firewalld[1030]: WARNING: reject-route: INVALID_ICMPTYPE: No supported ICMP type., ignoring for run-time.
+
+# firewall-cmd --list-ports
+
+# firewall-cmd --list-services
+ssh dhcpv6-client
+
+No ports were returned (might be the wrong command, as no ports are returned after adding samba). The samba service is not registered with the firewall services. ** this is the problem **
+
+# firewall-cmd --add-service=samba --permanent
+success
+
+// verify
+# firewall-cmd --reload
+success
+
+# firewall-cmd --list-services
+ssh dhcpv6-client samba
+
+** test **
+
+Result: Success
+
+Additional Information:
+=======================
+
+If the add-service command does fix the access issue, you can manually configure the ports:
+
+firewall-cmd --permanent --add-port=139/tcp
+firewall-cmd --permanent --add-port=445/tcp
+firewall-cmd --permanent --add-port=137/udp
+firewall-cmd --permanent --add-port=138/udp
+firewall-cmd --reload
+
+
+Setup a new zone in firewalld
+=============================
+
+$ firewall-cmd --get-default-zone
+public
+
+$ firewall-cmd --get-active-zones
+public
+  interface: enp0s31f6
+
+# firewall-cmd --permanent --new-zone=newZoneName
+
+# firewall-cmd --permanent --zone=newZoneName --add-rich-rule='rule family=ipv4 source address="192.168.2.0/24" service name="samba" log prefix="samba" level="info" limit value="1/m" accept'
+success
+
+# firewall-cmd --reload
+success
+
+// test by rebooting laptop, not working yet
+
+# firewall-cmd --permanent --zone=newZoneName --add-service=samba
+success
+
+# firewall-cmd --reload
+success
+
+// can now see newZoneName in Windows10 - but cannot access the share

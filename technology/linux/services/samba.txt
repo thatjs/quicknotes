@@ -1,0 +1,192 @@
+/* Copyright (C) ThatJs, 2018
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Date: March 26, 2017
+ */
+
+Samba Server for file and printer sharing
+
+Install Samba Server on Centos 7. There seems to be different configurations to setup samba. This installation
+focuses on a secured server using an existing workgroup to allow Windows clients to connect.
+
+
+1. Verify any existing installation
+-----------------------------------
+
+$ rpm -qa | grep
+
+samba-4.6.2-12.el7_4.x86_64
+samba-common-tools-4.6.2-12.el7_4.x86_64
+samba-libs-4.6.2-12.el7_4.x86_64
+samba-client-4.6.2-12.el7_4.x86_64
+samba-common-4.6.2-12.el7_4.noarch
+samba-common-libs-4.6.2-12.el7_4.x86_64
+samba-client-libs-4.6.2-12.el7_4.x86_64
+
+According to the http://www.samba.org, if you want Active Directory support, you will need to build Samba or install new packages due to licensing differences between RHEL (MIT) and Samba 4 AD (Heimdal). I do not plan to use Active Directory and will proceed with the pre-installed version of Samba.
+
+
+2. Verify environment
+---------------------
+
+$ systemctl list-unit-files | grep smb
+smb.service                                   disabled
+
+
+3. Standalone Configuration
+---------------------------
+
+a) define the configuration file
+
+/etc/samba/smb.conf
+
+# See smb.conf.example for a more detailed config file or
+# read the smb.conf manpage.
+# Run 'testparm' to verify the config is correct after
+# you modified it.
+
+[global]
+        workgroup = WORKGROUP
+        security = user
+
+        passdb backend = tdbsam
+
+        printing = cups
+        printcap name = cups
+        load printers = yes
+        cups options = raw
+
+        log file = /var/log/samba/%m
+        log level = 1
+
+[homes]
+        comment = Home Directories
+        valid users = %S, %D%w%S
+        browseable = No
+        read only = No
+        inherit acls = Yes
+
+[printers]
+        comment = All Printers
+        path = /var/tmp
+        printable = Yes
+        create mask = 0600
+        browseable = No
+
+[print$]
+        comment = Printer Drivers
+        path = /var/lib/samba/drivers
+        write list = root
+        create mask = 0664
+        directory mask = 0775
+
+
+b) create local users in the samba database
+
+Add a user and assign a password (use domain password):
+
+# smbpasswd -a username
+New SMB password:
+Retype new SMB password:
+Added user username
+
+# smbpasswd -e username
+Enable user username
+
+
+4. Configure SELinux
+--------------------
+Check SELinux settings for samba as root user. If not enabled, these need to be enabled.
+
+# sestatus -b | grep samba
+samba_domain_controller off
+samba_enable_home_dirs off
+
+# setsebool -P samba_domain_controller on
+# setsebool -P samba_enable_home_dirs on
+
+# sestatus -b | grep samba
+samba_domain_controller on
+samba_enable_home_dirs on
+
+
+5. Open Firewall
+----------------
+Most linux systems do not have the ports configured in the firewall to allow samba shares to be accessed from other
+machines on the network.
+
+
+# systemctl status firewalld -l
+● firewalld.service - firewalld - dynamic firewall daemon
+   Loaded: loaded (/usr/lib/systemd/system/firewalld.service; enabled; vendor preset: enabled)
+   Active: active (running) since Thu 2018-03-22 09:09:41 PDT; 5min ago
+     Docs: man:firewalld(1)
+ Main PID: 1030 (firewalld)
+   CGroup: /system.slice/firewalld.service
+           └─1030 /usr/bin/python -Es /usr/sbin/firewalld --nofork --nopid
+
+Mar 22 09:09:39 machine.name systemd[1]: Starting firewalld - dynamic firewall daemon...
+Mar 22 09:09:41 machine.name systemd[1]: Started firewalld - dynamic firewall daemon.
+
+
+# firewall-cmd --list-ports
+
+# firewall-cmd --list-services
+ssh dhcpv6-client
+
+No ports were returned (might be the wrong argument for the command, as no ports are returned after adding samba).
+The samba service is not registered with the firewall services.
+
+# firewall-cmd --add-service=samba --permanent
+success
+
+// verify
+# firewall-cmd --reload
+success
+
+# firewall-cmd --list-services
+ssh dhcpv6-client samba
+
+
+After opening the firewall, I was able to see my home directory on the Centos7 box from my Windows 10 machine.
+
+
+6. Debugging
+------------
+
+Linux box CENTOS has Centos 7 - Samba 4.6.2
+Linux box RHEL has RHEL 5.5 - Samba 3.0.33
+
+As I have another Linux box, so we can verify that the Samba Shares are correctly exposed:
+
+From CENTOS:
+
+$ smbclient -L //RHEL
+Domain=[RHEL] OS=[Unix] Server=[Samba 3.0.33-3.29.el5_5.1]
+
+    Sharename       Type      Comment
+    ---------       ----      -------
+    pub             Disk
+    IPC$            IPC       IPC Service (Rhel)
+    HP4500          Printer   HP OfficeJet 4500
+    myUser          Disk      Home Directories
+Domain=[RHEL] OS=[Unix] Server=[Samba 3.0.33-3.29.el5_5.1]
+
+    Server               Comment
+    ---------            -------
+
+    Workgroup            Master
+    ---------            -------
+    @RHEL                RHEL
+
+
+Login into RHEL:
+
+$ smbclient -L //CENTOS
+smbclient --user=myUser -L //192.168.2.2
+Error connecting to 192.168.2.2 (No route to host)
+Connection to 192.168.2.2 failed (Error NT_STATUS_HOST_UNREACHABLE)
+
+Most likely issue: ** firewall is rejecting requests **
+
+See section 5 Open Firewall and firewalld.txt
