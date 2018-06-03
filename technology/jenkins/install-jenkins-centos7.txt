@@ -1,0 +1,280 @@
+/* Copyright (C) ThatJs, 2018
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Original Publication Date: May 30, 2018
+ */
+
+Installing Jenkins on CentOS7 (Linux) box.
+
+This installation will install Jenkins using an existing installation of Java. Jenkins will be installed via yum and then use systemd to automatically start the Jenkins service on system reboot. All installation steps are performed as the a privileged user on the system.
+
+
+1. Verify dependencies
+----------------------
+
+# java -version
+openjdk version "1.8.0_171"
+OpenJDK Runtime Environment (build 1.8.0_171-b10)
+OpenJDK 64-Bit Server VM (build 25.171-b10, mixed mode)
+
+
+2. Add the rpm repository key
+-----------------------------
+
+# rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+
+
+3. Add the package repository
+-----------------------------
+
+# wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+--2018-05-29 20:17:43--  https://pkg.jenkins.io/redhat-stable/jenkins.repo
+Resolving pkg.jenkins.io (pkg.jenkins.io)... 52.202.51.185
+Connecting to pkg.jenkins.io (pkg.jenkins.io)|52.202.51.185|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 85
+Saving to: ‘/etc/yum.repos.d/jenkins.repo’
+
+100%[==============================================================================>] 85  --.-K/s   in 0s
+
+2018-05-29 20:17:43 (1.94 MB/s) - ‘/etc/yum.repos.d/jenkins.repo’ saved [85/85]
+
+
+4. Update package manager
+-------------------------
+
+# yum repolist
+Loaded plugins: fastestmirror, langpacks
+Loading mirror speeds from cached hostfile
+ * base: dallas.tx.mirror.xygenhosting.com
+ * extras: mirrors.oit.uci.edu
+ * updates: mirror.hmc.edu
+
+jenkins                               | 2.9 kB  00:00:00
+jenkins/primary_db                    |  24 kB  00:00:00
+
+repo id                 repo name                      status
+base/7/x86_64           CentOS-7 - Base                 9,911
+extras/7/x86_64         CentOS-7 - Extras                 305
+google-chrome           google-chrome                       3
+jenkins                 Jenkins-stable                     75
+sublime-text            Sublime Text - x86_64 - Dev         1
+updates/7/x86_64        CentOS-7 - Updates                632
+repolist: 10,927
+
+
+5. Install the software package
+-------------------------------
+
+# yum install jenkins
+Loaded plugins: fastestmirror, langpacks
+Loading mirror speeds from cached hostfile
+ * base: dallas.tx.mirror.xygenhosting.com
+ * extras: mirrors.oit.uci.edu
+ * updates: mirror.hmc.edu
+Resolving Dependencies
+--> Running transaction check
+---> Package jenkins.noarch 0:2.107.3-1.1 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+========================================================================================================================
+ Package                    Arch                      Version                          Repository                  Size
+========================================================================================================================
+Installing:
+ jenkins                    noarch                    2.107.3-1.1                      jenkins                     71 M
+
+Transaction Summary
+========================================================================================================================
+Install  1 Package
+
+Total download size: 71 M
+Installed size: 71 M
+Is this ok [y/d/N]: y
+Downloading packages:
+jenkins-2.107.3-1.1.noarch.rpm                                                                       |   71 MB  00:00:35
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : jenkins-2.107.3-1.1.noarch                                                                            1/1
+  Verifying  : jenkins-2.107.3-1.1.noarch                                                                            1/1
+
+Installed:
+  jenkins.noarch 0:2.107.3-1.1
+
+Complete!
+
+
+6. Add systemd service configuration file
+-----------------------------------------
+
+# cd /usr/lib/systemd/system
+# vi jenkins.service
+
+[Unit]
+Description=Jenkins Daemon
+After=network.target
+Requires=network.target
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/sysconfig/jenkins
+ExecStart=/bin/bash -c java ${JENKINS_JAVA_OPTIONS} -jar /usr/lib/jenkins/jenkins.war --httpPort=${JENKINS_PORT} --httpListenAddress=${JENKINS_LISTEN_ADDRESS} ${JENKINS_ARGS}
+Restart=always
+User=jenkins
+RestartSec=20
+
+[Install]
+WantedBy=multi-user.target
+
+esc :wq
+
+
+7. Register the systemd service file
+------------------------------------
+
+# systemctl enable jenkins.service
+Created symlink from /etc/systemd/system/multi-user.target.wants/jenkins.service to /usr/lib/systemd/system/jenkins.service.
+
+
+8. Start the Jenkins service
+----------------------------
+
+# systemctl start jenkins
+# systemctl status jenkins
+● jenkins.service - Jenkins Daemon
+   Loaded: loaded (/usr/lib/systemd/system/jenkins.service; enabled; vendor preset: disabled)
+   Active: activating (auto-restart) (Result: exit-code) since Tue 2018-05-29 20:32:38 PDT; 14s ago
+  Process: 5052 ExecStart=/bin/bash -c java ${JENKINS_JAVA_OPTIONS} -jar /usr/lib/jenkins/jenkins.war --httpPort=${JENKINS_PORT} --httpListenAddress=${JENKINS_LISTEN_ADDRESS} ${JENKINS_ARGS} (code=exited, status=1/FAILURE)
+ Main PID: 5052 (code=exited, status=1/FAILURE)
+
+May 29 20:32:38 my.server systemd[1]: jenkins.service: main process exited, code=exited, status=1/FAILURE
+May 29 20:32:38 my.server systemd[1]: Unit jenkins.service entered failed state.
+May 29 20:32:38 my.server systemd[1]: jenkins.service failed.
+
+Failed !!
+
+
+9. Debugging the systemd jenkins.service file
+---------------------------------------------
+
+Logging is captured for systemd, view the logs with journalctl. This logging can be very large, you need to filter down the output to focus on jenkins.service script.
+
+# journalctl -u jenkins.service
+
+...
+May 30 07:48:10 my.server systemd[1]: jenkins.service: main process exited, code=exited, status=1/FAILURE
+May 30 07:48:10 my.server systemd[1]: Unit jenkins.service entered failed state.
+May 30 07:48:10 my.server systemd[1]: jenkins.service failed.
+May 30 07:48:30 my.server systemd[1]: jenkins.service holdoff time over, scheduling restart.
+May 30 07:48:30 my.server systemd[1]: Started Jenkins Daemon.
+May 30 07:48:30 my.server systemd[1]: Starting Jenkins Daemon...
+May 30 07:48:30 my.server bash[4897]: Usage: java [-options] class [args...]
+May 30 07:48:30 my.server bash[4897]: (to execute a class)
+May 30 07:48:30 my.server bash[4897]: or  java [-options] -jar jarfile [args...]
+May 30 07:48:30 my.server bash[4897]: (to execute a jar file)
+
+The logs are telling us that there is a problem with how java is being invoked. Run the ExecStart command in a console to verify the correct command syntax. To find the correct path for java on your system:
+
+# which java
+/usr/bin/java
+
+Try replacing java with /usr/bin/java in the jenkins.service file
+
+Before:
+ExecStart=/bin/bash -c java ${JENKINS_JAVA_OPTIONS} -jar /usr/lib/jenkins/jenkins.war --httpPort=${JENKINS_PORT} --httpListenAddress=${JENKINS_LISTEN_ADDRESS} ${JENKINS_ARGS}
+
+After:
+ExecStart=/bin/bash -c /usr/bin/java ${JENKINS_JAVA_OPTIONS} -jar /usr/lib/jenkins/jenkins.war --httpPort=${JENKINS_PORT} --httpListenAddress=${JENKINS_LISTEN_ADDRESS} ${JENKINS_ARGS}
+
+# systemctl daemon-reload
+
+Start the service again
+
+# systemctl start jenkins.service
+# systemctl status jenkins.service
+
+Same problem, dig deeper.
+
+Before:
+ExecStart=/bin/bash -c /usr/bin/java ${JENKINS_JAVA_OPTIONS} -jar /usr/lib/jenkins/jenkins.war --httpPort=${JENKINS_PORT} --httpListenAddress=${JENKINS_LISTEN_ADDRESS} ${JENKINS_ARGS}
+
+After:
+ExecStart=/usr/bin/java ${JENKINS_JAVA_OPTIONS} -jar /usr/lib/jenkins/jenkins.war --httpPort=${JENKINS_PORT} --httpListenAddress=${JENKINS_LISTEN_ADDRESS} ${JENKINS_ARGS}
+
+# systemctl start jenkins
+# systemctl status jenkins
+
+!! working !!
+
+
+10. Setting up basic security
+-----------------------------
+
+Credentials on the Jenkins home page are for remote system access. Do not added local users here.
+
+After Jenkins start/restart
+
+Log In -> Sign up (Create an account)
+
+Complete the user registration instructions. Click Save.
+
+Notice:
+
+- Your name is displayed in the upper right, with the log out link
+- Upper left may display Jenkins > Jenkins's own user database
+
+Create at least two users, your admin user and a registered user with read only permissions. The second user is needed to verify what contributors see, who do not have administration privileges.
+
+Basic Security:
+
+Manage Jenkins -> Configure Global Security
+
+[x] Logged-in users can do anything
+  [x] Allow anonymous read access
+
+
+Matrix Based Security:
+
+Manage Jenkins -> Configure Global Security
+
+[x] Matrix-based security
+
+Enter the username for each user (there is no list provided) and click the Add button. If you created a name for your users, it will display in the first column, otherwise you will see their username.
+
+Note: If the added user appears greyed out with a strikethrough, you are trying to add a credential to the matrix, this will result in a lockout. To prevent getting locked out, do not save on this view. Remove credential users and create registered users through clicking the login view's 'create an account' link.
+
+Once users are listed in the grid, set their permissions.
+
+For your administrator user: check Overall:Administrator
+For your read only user: check Overall:Read
+
+Click Save button at bottom of view.
+
+Click log out.
+
+Matrix based security prevents anonymous users from viewing your Jenkins instance. Notice the 'Create an account' link? On largeror public networks this should be disabled, by unchecking the box in the Basic Security section.
+
+
+=================================================
+
+User lock out:
+
+$ su
+# cd /var/lib/jenkins
+
+# vi config.xml
+<useSecurity>false</useSecurity>
+esc :wq
+
+# ls -l | grep config
+-rw-r--r--.   1 jenkins jenkins 4085 Jun  2 10:12 config.xml
+
+Make sure permissions remain as the Jenkins user
+
+# systemctl stop jenkins
+# systemctl start jenkins
+
+!! back to working !!
