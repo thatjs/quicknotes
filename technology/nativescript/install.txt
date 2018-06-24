@@ -1,0 +1,49 @@
+/* Copyright (C) ThatJs, 2018
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Date: June 24, 2018
+ */
+
+NativeScript mobile framework installation.
+
+Note: NativeScript CLI uses Xcode to build iOS apps, which is only available on the MacOS operating system. To build iOS apps from Linux, use NativeScript Sidekick which includes a service to provide iOS and Android builds in the cloud.
+
+
+1. Install latest NodeJs (current 8.11.3 LTS)
+---------------------------------------------
+
+I strongly recommend using a NodeJs version manager like nvm, there are versions for Windows/Mac/Linxu.
+To install nvm see:
+
+quicknotes/technology/linux/services/nvm.txt
+
+$ cd
+$ nvm install 8.11
+Now using node v8.11.3 (npm v5.6.0)
+Creating default alias: default -> 8.11 (-> v8.11.3)
+
+
+2. Install NativeScript CLI
+---------------------------
+
+The NativeScript CLI tool uses the tns command for all operations.
+
+Nativescript printed warning messages when first installed. When I installed NodeJs using nvm, it installed npm version 5.6.0, this is older and we need to have the latest npm to install NativeScript without warnings.
+
+$ npm install npm@latest -g
++ npm@6.1.0
+
+$ npm install -g nativescript
++ nativescript@4.1.1
+added 656 packages from 1180 contributors in 6.345s
+
+Confirm the installed versions:
+
+$ node --version
+v8.11.3
+
+$ npm --version
+6.1.0
+
+$ tns --version
+4.1.1

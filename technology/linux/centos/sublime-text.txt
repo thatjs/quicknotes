@@ -1,0 +1,48 @@
+/* Copyright (C) ThatJs, 2017
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Date: December 30, 2017
+ */
+
+Sublime Text 3
+
+Install Sublime Text 3 editor on Centos 7. All commands are executed as root, or use sudo if configured.
+
+
+1. Import the package public key
+--------------------------------
+The package key is imported to verify the digital signature of the package.
+
+$ su
+
+# rpm -v --import https://download.sublimetext.com/sublimehq-rpm-pub.gpg
+
+
+2. Register the package repository with yum
+-------------------------------------------
+
+# yum-config-manager --add-repo https://download.sublimetext.com/rpm/stable/x86_64/sublime-text.repo
+
+
+3. Install the package
+----------------------
+
+# yum install sublime-text
+
+On Centos, custom packages are installed in the 'opt' directory.
+
+/opt/sublime-text/
+
+
+4. Add the application to a custom application menu:
+----------------------------------------------------
+Centos 7:
+See technology/linux/centos/application-launcher.txt to setup custom menu items.
+
+# cd /usr/share/applications
+# vi sublime-text.desktop
+
+...
+Categories={custom-menu-name};TextEditor;Development
+
+esc + :wq
