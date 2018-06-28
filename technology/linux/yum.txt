@@ -1,0 +1,23 @@
+/* Copyright (C) ThatJs, 2018
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Date: June 28, 2018
+ */
+
+YUM - Yellowdog Update Modified
+
+YUM is a package manager that simplifies installing, updating and removing libraries from Linux distributions. It is natively included in Centos.
+
+
+List all packages from configured repositories
+# yum list available
+# yum list available | grep <package>
+
+Find installed package by name
+# yum list <package>
+
+Search name, descriptions, summaries of packages
+# yum search <package>
+
+Search files included in packages and functions, slower
+# yum provides <package>
