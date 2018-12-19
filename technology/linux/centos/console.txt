@@ -1,0 +1,20 @@
+/* Copyright (C) ThatJs, 2018
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Date: December 19, 2018
+ */
+
+Color output in xterm/console window:
+
+$ cd
+$ vi .bash_profile
+
+export CLICOLOR=1;
+export LSCOLORS=exfxcxdxbxegedabagacad;
+
+esc + :wq
+
+$ source .bash_profile
+$ ls
+
+Console output will now display directories in blue.

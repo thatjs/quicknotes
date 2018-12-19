@@ -6,7 +6,7 @@
 
 Sublime Text 3
 
-Install Sublime Text 3 editor on Centos 7. All commands are executed as root, or use sudo if configured.
+Install Sublime Text 3 editor on Centos 7. All commands are executed as root, or use sudo if configured. Upgrading version listed later.
 
 
 1. Import the package public key
@@ -46,3 +46,9 @@ See technology/linux/centos/application-launcher.txt to setup custom menu items.
 Categories={custom-menu-name};TextEditor;Development
 
 esc + :wq
+
+
+Upgrading Sublime Text 3:
+=========================
+
+# yum upgrade sublime-text

@@ -8,6 +8,11 @@ Assumes local git repository and upstream shared repository.
 
 Everyday git commands:
 
+$ git checkout master
+$ git branch -b feature-branch
+
+Make changes ...
+
 $ git add file(s)
 $ git commit -m "project - issue - commit message"
 $ git pull --rebase origin master
@@ -20,6 +25,8 @@ Useful git aliases:
 
 $ git st    $ git config --global alias.st 'status'
 $ git sp    $ git config --global alias.sp 'stash pop stash@{0}'
+$ git brc   $ git config --global alias.brc '!f() { git branch | grep \*; };f'
+
 
 $ git config --list
 ...
@@ -31,3 +38,8 @@ One Time Setup
 
 $ git config --global user.name "{unique-id}"
 $ git config --global user.email "{unique-email}"
+
+
+Linux colored console output:
+
+$ git config --global color.ui true
