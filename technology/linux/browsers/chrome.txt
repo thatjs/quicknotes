@@ -1,4 +1,4 @@
-/* Copyright (C) ThatJs, 2017
+/* Copyright (C) ThatJs, 2019
  *
  * Author: Andrew Schoenherr <dev@thatjs.com>
  * Date: Dec 25, 2017
@@ -6,7 +6,8 @@
 
 Chrome Browser
 
-Install latest version of browser and make it available for all users
+Install latest version of browser and make it available for all users. Bookmarks from the previous version are
+stored in /home/{user}/.config/google-chrome/Default/Bookmarks
 
 
 1. One time setup
@@ -45,6 +46,8 @@ $ mv google-chrome-stable_63_x86_64.rpm /home/{user}/local/src/archive/
 
 # 3. Add to custom application menu
 -----------------------------------
+
+Only need to do this if you want the Chrome launcher in a different category other than Internet.
 
 $ su
 
