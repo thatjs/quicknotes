@@ -1,0 +1,124 @@
+/* Copyright (C) ThatJs, 2019
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Date: January 16, 2019
+ */
+
+MySQL Server & Client
+
+CentOS 7 comes bundled with the MariaDB Server. MariaDB as I found out is a fork of MySQL after it was acquired by Oracle. The differences are minimal, however my hosting provider uses MySQL-5.6 and these instructions detail replacing MariaDB with an older version of MySQL.
+
+1. Verify current libraries
+---------------------------
+
+$ rpm -qa | grep mysql
+qt-mysql-4.8.7-2.el7.x86_64
+qt5-qtbase-mysql-5.9.2-3.el7.x86_64
+akonadi-mysql-1.9.2-4.el7.x86_64
+
+$ cat /etc/passwd | grep mysql
+mysql:x:27:27:Maria DB Server:/var/lib/mysql
+
+$ cat /etc/group | grep mysql
+mysql:x:27:
+
+$ systemctl status mariadb
+● mariadb.service - MariaDB database server
+   Loaded: loaded (/usr/lib/systemd/system/mariadb.service; disabled; vendor preset: disabled)
+   Active: inactive (dead)
+
+
+2. Remove MariaDB Server and Client
+-----------------------------------
+
+$ su
+# yum remove mariadb mariadb-server mariadb-libs
+
+
+3. Install MySQL via YUM
+------------------------
+
+# yum install http://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm
+...
+Running transaction
+ Installing : mysql-community-release-el7-5.noarch                         1/1
+ Verifying  : mysql-community-release-el7-5.noarch                         1/1
+
+Installed:
+ mysql-community-release.noarch 0:el7-5
+
+Complete!
+
+
+# yum repolist enabled | grep "mysql.*-community.*"
+
+mysql-connectors-community/x86_64       MySQL Connectors Community            74
+mysql-tools-community/x86_64            MySQL Tools Community                 74
+mysql56-community/x86_64                MySQL 5.6 Community Server           429
+
+
+# yum install mysql-community-server
+...
+Running transaction
+  Installing : mysql-community-common-5.6.42-2.el7.x86_64                     1/4
+  Installing : mysql-community-libs-5.6.42-2.el7.x86_64                       2/4
+  Installing : mysql-community-client-5.6.42-2.el7.x86_64                     3/4
+  Installing : mysql-community-server-5.6.42-2.el7.x86_64                     4/4
+  Verifying  : mysql-community-libs-5.6.42-2.el7.x86_64                       1/4
+  Verifying  : mysql-community-common-5.6.42-2.el7.x86_64                     2/4
+  Verifying  : mysql-community-client-5.6.42-2.el7.x86_64                     3/4
+  Verifying  : mysql-community-server-5.6.42-2.el7.x86_64                     4/4
+
+Installed:
+  mysql-community-libs.x86_64 0:5.6.42-2.el7                mysql-community-server.x86_64 0:5.6.42-2.el7
+
+Dependency Installed:
+  mysql-community-client.x86_64 0:5.6.42-2.el7               mysql-community-common.x86_64 0:5.6.42-2.el7
+
+# systemctl status mysqld
+● mysqld.service - MySQL Community Server
+   Loaded: loaded (/usr/lib/systemd/system/mysqld.service; enabled; vendor preset: disabled)
+   Active: active (exited) since Wed 2019-01-16 08:35:52 PST; 46min ago
+
+
+4. Connect, reset root password, create regular user
+----------------------------------------------------
+
+$ mysql -u root -p
+{root password}
+
+mysql> set password for 'root'@'localhost' = password('{mysqlRootPass}');
+mysql> set password for 'root'@'hayward.server' = password('{mysqlRootPass}');
+
+mysql> use mysql;
+
+Create a regular user, allowed to access the server from outside ('%'):
+
+mysql> create user 'mysql'@'%' identified by '{mysqlUserPass}';
+
+mysql> select Host, User, Password from user;
++----------------+-------+-------------------------------------------+
+| Host           | User  | Password                                  |
++----------------+-------+-------------------------------------------+
+| localhost      | root  | *2AF655EBAFEF0038C23690ABA9DFFB1CCAED3E5B |
+| {host}.server  | root  | *2AF655EBAFEF0038C23690ABA9DFFB1CCAED3E5B |
+| 127.0.0.1      | root  | *E816455FF007377654F6D9F8C8C2F4F363EFBE9F |
+| ::1            | root  | *E816455FF007377654F6D9F8C8C2F4F363EFBE9F |
+| %              | mysql | *5AA26D411936DD0F2EF5100CE37586F79BD09F21 |
++----------------+-------+-------------------------------------------+
+5 rows in set (0.00 sec)
+
+Verify that you can log into mysql using 'mysql' user and password:
+
+$ mysql -u mysql -p
+{user password}
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| test               |
++--------------------+
+2 rows in set (0.00 sec)
+
