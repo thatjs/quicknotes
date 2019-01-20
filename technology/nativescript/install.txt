@@ -47,3 +47,34 @@ $ npm --version
 
 $ tns --version
 4.1.1
+
+
+3. Create first app
+-------------------
+
+The cli command tns create, will scaffold a new application. See wiki for full command usage:
+https://github.com/NativeScript/NativeScript/wiki/Using-the-%60tns-create%60-command
+Android installation needs to be completed before adding the Android platform.
+
+$ cd
+$ mkdir nativescript
+$ cd nativescript
+
+$ tns create recorder --ng
+...
+Adding 'es6' lib to tsconfig.json...
+Adding 'dom' lib to tsconfig.json...
+Adding 'es2015.iterable' lib to tsconfig.json...
+Adding tns-core-modules path mappings lib to tsconfig.json...
+Project already targets TypeScript ~2.7.2
+added 16 packages from 6 contributors in 3.072s
+Project recorder was successfully created.
+
+Now you can navigate to your project with $ cd recorder
+After that you can run it on device/emulator by executing $ tns run <platform>
+
+** need to have Android SDK installed first
+
+$ tns run
+
+
