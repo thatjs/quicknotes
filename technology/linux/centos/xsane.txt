@@ -1,0 +1,53 @@
+/* Copyright (C) ThatJs, 2019
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Date: January 24, 2019
+ */
+
+Scanning from an HP multi purpose printer on CentOS7.
+
+After building my CentOS7 system a few years ago, I was delighted to find out that configuring print drivers from
+HP has become simple and intuitive. No hassles and it just works. Recently, I needed to scan a document, and
+as usual did a quick web search. Xsane was very straight forward to install and I was able to scan equally quickly.
+
+1. Install HP and Xsane
+-----------------------
+
+$ su
+
+# yum install hplip hplip-gui xsane sane
+
+
+2. Configure the Scanner
+------------------------
+
+# hp-setup
+
+Accept the default driver for your HP printer. In my case I have a network printer. Enter the IP address for the printer
+and it will populate the device in the window.
+
+Click Add Printer button
+
+# exit
+
+
+3. Start scanner
+----------------
+
+$ xsane
+
+Add the document to the flatbed scanner.
+
+Click the Acquire Preview button
+
+Adjust the capture boundaries.
+
+Select the output file type, filename and save location.
+
+Click the Scan button.
+
+
+4. Verify the scanned document in the output file
+-------------------------------------------------
+
+Opened my scanned document in pdf format. Done.
