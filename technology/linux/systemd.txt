@@ -1,0 +1,108 @@
+/* Copyright (C) ThatJs, 2018
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Date: February 2, 2018
+ */
+
+Systemd daemon for controlling processes
+
+Quickstart Commands:
+
+# systemctl enable servicename
+# systemctl disable servicename
+# systemctl start servicename
+# systemctl stop servicename
+# systemctl restart servicename
+# systemctl reload servicename
+# systemctl daemon-reload
+
+# systemctl --version
+systemd 219
++PAM +AUDIT +SELINUX +IMA -APPARMOR +SMACK +SYSVINIT +UTMP +LIBCRYPTSETUP +GCRYPT +GNUTLS +ACL +XZ -LZ4 -SECCOMP +BLKID +ELFUTILS +KMOD +IDN
+
+# systemd-analyze
+Startup finished in 800ms (kernel) + 2.713s (initrd) + 20.574s (userspace) = 24.088s
+
+# systemd-analyze blame
+          5.211s plymouth-quit-wait.service
+          3.860s NetworkManager-wait-online.service
+          2.533s lvm2-monitor.service
+          2.420s dev-mapper-centos\x2droot.device
+          2.236s systemd-udev-settle.service
+          2.109s lvm2-pvscan@8:2.service
+          1.359s kdump.service
+           979ms firewalld.service
+           692ms systemd-udevd.service
+           663ms home.mount
+           612ms proc-fs-nfsd.mount
+...
+
+# systemctl is-enabled smb   // is service enabled at boot
+disabled
+
+# systemctl is-active smb
+unknown
+
+# systemctl status smb
+● smb.service - Samba SMB Daemon
+   Loaded: loaded (/usr/lib/systemd/system/smb.service; disabled; vendor preset: disabled)
+   Active: inactive (dead)
+
+# systemctl enable smb
+# systemctl start smb
+
+# systemctl status smb
+● smb.service - Samba SMB Daemon
+   Loaded: loaded (/usr/lib/systemd/system/smb.service; enabled; vendor preset: disabled)
+   Active: active (running) since Thu 2018-02-01 20:15:29 PST; 2s ago
+ Main PID: 18426 (smbd)
+   Status: "smbd: ready to serve connections..."
+   CGroup: /system.slice/smb.service
+           ├─18426 /usr/sbin/smbd
+           ├─18427 /usr/sbin/smbd
+           ├─18428 /usr/sbin/smbd
+           └─18429 /usr/sbin/smbd
+
+Feb 01 20:15:29 localhost systemd[1]: Starting Samba SMB Daemon...
+Feb 01 20:15:29 localhost smbd[18426]: [2018/02/01 20:15:29.450237,  0] ../lib/util/become_daemon.c:124(daemon_ready)
+Feb 01 20:15:29 localhost smbd[18426]:   STATUS=daemon 'smbd' finished starting up and ready to serve connections
+Feb 01 20:15:29 localhost systemd[1]: Started Samba SMB Daemon.
+
+
+# systemctl
+// get a list of all services and their status
+
+# systemctl list-unit-files
+// simple list and status
+
+# systemctl --failed
+// list of processes that failed at boot
+
+# systemctl cat smb
+# /usr/lib/systemd/system/smb.service
+[Unit]
+Description=Samba SMB Daemon
+After=syslog.target network.target nmb.service winbind.service
+
+[Service]
+Environment=KRB5CCNAME=FILE:/run/samba/krb5cc_samba
+Type=notify
+NotifyAccess=all
+PIDFile=/run/smbd.pid
+LimitNOFILE=16384
+EnvironmentFile=-/etc/sysconfig/samba
+ExecStart=/usr/sbin/smbd $SMBDOPTIONS
+ExecReload=/usr/bin/kill -HUP $MAINPID
+LimitCORE=infinity
+
+[Install]
+WantedBy=multi-user.target
+
+
+Testing:
+
+Open file browser (remote system)
+
++ Other Locations
+smb://192.168.2.4
+

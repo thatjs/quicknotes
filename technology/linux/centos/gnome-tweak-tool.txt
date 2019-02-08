@@ -1,0 +1,17 @@
+/* Copyright (C) ThatJs, 2019
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Date: January 5, 2019
+ */
+
+Enhanced control over the gnome desktop. Display the date in the toolbar.
+
+$ cd
+# su
+# yum install gnome-tweak-tool
+
+Then open the application:
+
+Applications -> Activities Overview -> Tweaks
+
+    Top Bar -> Date -> on
