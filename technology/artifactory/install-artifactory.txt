@@ -1,0 +1,194 @@
+/* Copyright (C) ThatJs, 2019
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Original Publication Date: June 02, 2019
+ */
+
+Installing Artifactory on CentOS (Linux) box:
+
+Location:
+
+/opt/jfrog/artifactory
+
+
+1. Install by RPM
+-----------------
+
+$ cd
+
+Download latest RPM from JFrog: https://www.jfrog.com/open-source
+Click download button for RPM.
+
+/home/{user}/Downloads/jfrog-artifactory-oss-6.10.1.rpm
+
+$ su
+<passwd>
+
+# rpm -ihv /home/{user}/Downloads/jfrog-artifactory-oss-6.10.1.rpm
+Preparing...                          ################################# [100%]
+Checking if group artifactory exists...
+Group artifactory doesn't exist. Creating ...
+Checking if user artifactory exists...
+User artifactory doesn't exist. Creating ...
+Checking if ARTIFACTORY_HOME exists
+Removing tomcat work directory
+Updating / installing...
+   1:jfrog-artifactory-oss-6.10.1-6100################################# [100%]
+Adding the artifactory service to auto-start
+ DONE
+NOTE: The following procedures change the ownership of files and may take several minutes. Do not stop the installation/upgrade process.
+
+The installation of Artifactory has completed successfully.
+
+PLEASE NOTE: It is highly recommended to use Artifactory with conjunction with an external database (MySQL, Oracle, Microsoft SQL Server, PostgreSQL, MariaDB). For details about how to configure the database, refer to https://www.jfrog.com/confluence/display/RTF/Configuring+the+Database
+
+You can activate artifactory with:
+> systemctl start artifactory.service
+
+Then check the status with:
+> systemctl status artifactory.service
+
+# exit
+
+
+2. Verify Artifactory Startup Script
+------------------------------------
+
+$ systemctl status artifactory
+● artifactory.service - Setup Systemd script for Artifactory in Tomcat Servlet Engine
+   Loaded: loaded (/usr/lib/systemd/system/artifactory.service; enabled; vendor preset: disabled)
+   Active: inactive (dead)
+
+
+3. Verify MySQL Database on server
+----------------------------------
+
+$ systemctl status mysql
+● mysqld.service - MySQL Community Server
+   Loaded: loaded (/usr/lib/systemd/system/mysqld.service; enabled; vendor preset: disabled)
+   Active: active (running) since Sun 2019-06-02 13:08:55 PDT; 1h 31min ago
+  Process: 6260 ExecStartPost=/usr/bin/mysql-systemd-start post (code=exited, status=0/SUCCESS)
+  Process: 5619 ExecStartPre=/usr/bin/mysql-systemd-start pre (code=exited, status=0/SUCCESS)
+ Main PID: 6259 (mysqld_safe)
+    Tasks: 23
+
+If you have not installed MySQL or another database, read this:
+https://github.com/thatjs/quicknotes/technology/linux/services/mysqld.txt
+
+
+4. Configure Artifactory to use MySQL Database
+----------------------------------------------
+
+$ su
+<passwd>
+
+# /opt/jfrog/artifactory/bin/configure.mysql.sh
+
+
+Please enter the MySQL server admin username [root]:
+
+Please enter the MySQL server admin password: <mysql root passwd>
+Please enter the Artifactory database username [artifactory]:
+
+Please enter the Artifactory database password [password]: <new artifactory password>
+Creating the Artifactory MySQL user and database...
+Warning: Using a password on the command line interface can be insecure.
+Warning: Using a password on the command line interface can be insecure.
+
+No MySQL JDBC connector found. Download or copy one needed.
+Does the current server has access to the Internet? [Y/n]y
+
+Downloading mysql-connector-java-5.1.24.jar to /opt/jfrog/artifactory/tomcat/lib...
+
+Configuration completed successfully!
+You can now start up the Artifactory service to use Artifactory with MySQL.
+Press enter to exit...
+
+
+5. Confirm user in MySQL database
+---------------------------------
+
+$ mysql -u root -p
+{mysql root password}
+
+mysql> use mysql;
+
+mysql> select Host, User, Password from user;
+
++----------------+-------------+-------------------------------------------+
+| Host           | User        | Password                                  |
++----------------+-------------+-------------------------------------------+
+| localhost      | root        | *2AF655EBAFEF0038C23690ABA9DFFB1CCAED3E5B |
+| {host}.server  | root        | *2AF655EBAFEF0038C23690ABA9DFFB1CCAED3E5B |
+| 127.0.0.1      | root        | *E816455FF007377654F6D9F8C8C2F4F363EFBE9F |
+| ::1            | root        | *E816455FF007377654F6D9F8C8C2F4F363EFBE9F |
+| %              | mysql       | *5AA26D411936DD0F2EF5100CE37586F79BD09F21 |
+| localhost      | artifactory | *09846298A00DA61C4204B83C846B8FBF87799EE2 |
++----------------+-------------+-------------------------------------------+
+
+
+6. Start Artifactory Application
+--------------------------------
+
+$ su
+<passwd>
+
+# systemctl start artifactory
+
+# systemctl status artifactory
+● artifactory.service - Setup Systemd script for Artifactory in Tomcat Servlet Engine
+   Loaded: loaded (/usr/lib/systemd/system/artifactory.service; enabled; vendor preset: disabled)
+   Active: active (running) since Sun 2019-06-02 15:20:47 PDT; 3s ago
+  Process: 16014 ExecStart=/opt/jfrog/artifactory/bin/artifactoryManage.sh start (code=exited, status=0/SUCCESS)
+ Main PID: 16095 (java)
+    Tasks: 0
+
+Open browser to access Artifactory application:
+http://localhost:8081
+
+!! Installed !!
+
+
+7. Reset Default Credentials
+----------------------------
+
+Open Artifactory: http://localhost:8081
+
+Follow first access: overlay to configure application:
+
+Admin Password:
+
+New Password: <artifactory admin passwd>
+ReType New Password: <artifactory admin passwd>
+
+Configure a Proxy Server: <skip>
+
+Create Repositories: maven -> create
+
+libs-snapshot-local
+libs-release-local
+jcenter
+libs-snapshot
+libs-release
+
+
+8. Integration API Key
+----------------------
+
+Typically your CI machine (Jenkins) will be able to communicate with Artifactory using a username and
+password compbination. You should also generate an API key on Artifactory to allow external services to
+make api calls to Artifactory.
+
+- Login as admin
+- User Presence 'Welcome, Admin' -> Edit Profile
+- Enter admin passwd -> Unlock button
+- Enter Admin Email Address: {user}@{domain}.com
+- Authentication Settings -> Generate Key
+- Click Save button
+
+Copy this api key and store it for later use.
+
+
+To use this token in REST calls, add a custom header:
+
+X-Jfrog-Art-Api: AKCp5cd5L4a15...LYXMMDqD6U5LpE1vRSwE6Vi
