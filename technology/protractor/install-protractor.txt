@@ -1,0 +1,144 @@
+/* Copyright (C) ThatJs, 2019
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Original Publication Date: July 8, 2019
+ */
+
+Install Protractor test automation for non-Angular applications.
+
+Protractor can be used for any web application or website where a system level test is desired to automate functionality. It was designed and documented specifically for the Angular framework, however is easily configured for web applications using any tech stack.
+
+The only requirement for executing Protractor tests is NodeJs, an operating system that contains a GUI, and a modern browser. Different documentation suggests Protractor will not execute on any version of NodeJs greater than 6.9, however I have not seen any problems on Centos7 using NodeJs version 8.11.3
+
+
+1. Pre-Requisites
+-----------------
+
+For the purpose of this installation. My system is configured as:
+
+Centos7
+Google Chrome 75
+NodeJs 8.11.3
+
+
+2. Install the dependencies using NPM
+-------------------------------------
+
+$ cd path/to/project
+
+$ npm install -g protractor --save-dev
+
+$ protractor --version
+Version 5.4.2
+
+
+3. Create configuration file
+----------------------------
+
+Create a configuration file for protractor in the root directory of your project. The configuration file makes a lot of assumptions which include: defaulting to 'Google Chrome' browser, so we do not need to explicitly set the browser.
+
+$ touch protractor.config.js
+
+$ vi protractor.config.js
+
+Copy and paste the following:
+
+exports.config = {
+    seleniumAddress: 'http://localhost:4444/wd/hub',
+    specs: ['test/system/index-spec.js'],
+    onPrepare: () => {
+        browser.waitForAngularEnabled(false);  // testing a non Angular site
+        browser.ignoreSyncronization = true;   // will not wait for $timeout and $http calls to have processed
+    }
+};
+
+
+4. Create the first page object & spec (test) file
+--------------------------------------------------
+
+Page Objects are the preferred way to build out the test infrastructure. A page object can be imported into any spec (test) file and provides a mechanism to reuse selectors. I choose not to allow expectations inside po files simply to improve the readability of writing tests.
+
+$ cd path/to/project
+
+$ mkdir -p test/system
+
+$ cd test/system
+
+
+a) Create the Page Object (po) file:
+
+$ touch index.po.js
+
+Copy and paste the following:
+
+'use strict';
+
+let Index = function () {
+
+    this.title = element(by.css('.title'));
+
+};
+module.exports = new Index();
+
+
+b) Create the spec (test) file:
+
+$ touch index.spec.js
+
+Copy and paste the following:
+
+'use strict';
+
+let index = require('./index.po');
+
+describe('practice index page', function() {
+
+    beforeEach(() => {
+        browser.get('url to web application, or website');  // http://localhost:3000
+    });
+
+    it('should verify index page', function() {
+        expect(index.title.getText()).toEqual('Javascript Performance Testing 2');
+    });
+
+});
+
+
+5. Start Services
+-----------------
+
+We will use the built-in Selenium Server provided by the Protractor library.
+
+Open a new xterm (console window):
+
+$ cd path/to/project
+
+$ webdriver-manager update  // this only needs to be executed when the installed browser changes
+
+$ webdriver-manager start
+
+
+6. Start Web Application
+------------------------
+
+In a development environment, start your web application and make sure that the address for the home page is added to your spec file. If testing a website, change the url above to point to the website landing page. In my case, I use BrowserSync for local hosting, hence my landing page is http://localhost:3000
+
+
+7. Run tests
+------------
+
+Open a new xterm (console window):
+
+$ cd path/to/project
+
+$ protractor protractor.config.js
+[21:18:24] I/launcher - Running 1 instances of WebDriver
+[21:18:24] I/hosted - Using the selenium server at http://localhost:4444/wd/hub
+Started
+.
+
+1 spec, 0 failures
+Finished in 0.212 seconds
+
+
+!! Working !!
