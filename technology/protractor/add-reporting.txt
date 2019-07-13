@@ -1,0 +1,180 @@
+/* Copyright (C) ThatJs, 2019
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Original Publication Date: July 9, 2019
+ */
+
+Having installed Protractor, and running the first spec file the native console output is quite bland. Lets add some reporting to help in viewing tests and enable continuous integration systems like Jenkins consume Protractor tests results.
+
+The following changes are done in the Protractor configuration file, commonly named: protractor.config.js
+
+
+
+1. Add console reporting
+------------------------
+
+let reporter = {
+    console: require('jasmine-spec-reporter').SpecReporter
+};
+
+
+exports.config = {
+    ...
+    onPrepare: () => {
+
+        // console color
+        jasmine.getEnv().addReporter(new reporter.console({
+            spec: {
+                displayStackTrace: 'all'
+            }
+        }));
+
+    }
+};
+
+
+2. Add Junit reporter for Jenkins
+---------------------------------
+
+let colors = require('ansi-colors'),
+    fs = require('fs'),
+    log = require('fancy-log'),
+    mkdirp = require('mkdirp'),
+    reporter = {
+        console: require('jasmine-spec-reporter').SpecReporter,
+        xml: require('jasmine-reporters').JUnitXmlReporter
+    };
+
+let reportPath = __dirname + '/target/e2e';
+
+fs.stat(reportPath, function (err, stats) {
+    // only create path if it does not exist
+    if (stats === undefined) {
+        log(colors.green('Creating reporting directory: ' + reportPath));
+        try {
+            mkdirp.sync(reportPath, function (mkdirErr) {
+                if (mkdirErr) {
+                    log(mkdirErr);
+                }
+            });
+        } catch(tryErr) {
+            log(colors.red('Error trying to create the directories: ' + reportPath, tryError));
+        }
+    } else {
+        log(colors.green('Reporting directory already exists.'));
+    }
+});
+
+
+exports.config = {
+    ...
+    onPrepare: () => {
+
+        // junit reporter for Jenkins
+        jasmine.getEnv().addReporter(new reporter.xml({
+            savePath: reportPath,
+            consolidate: false,
+            consolidateAll: true
+        }));
+
+    }
+};
+
+
+3. Add Html reporter for console report
+---------------------------------------
+
+let reporter = {
+    html: require('protractor-jasmine2-html-reporter')
+};
+
+
+exports.config = {
+    ...
+    onPrepare: () => {
+
+        // html version of console report
+        jasmine.getEnv().addReporter(new reporter.html({
+            savePath: reportPath + '/html/',
+            screenshotsFolder: 'images',
+            takeScreenshotsOnlyOnFailure: true
+        }));
+
+    }
+};
+
+
+4. Add Allure reporter
+----------------------
+
+There is two parts to this reporter. Collecting the test run data into an xml file and installing the allure application on your machine, or using the Jenkins Allure plugin.
+
+
+a) Building the xml data:
+
+
+let reporter = {
+    allure: require('jasmine-allure-reporter')
+};
+
+
+exports.config = {
+    ...
+    onPrepare: () => {
+
+        // allure report
+        jasmine.getEnv().addReporter(new reporter.allure({
+            resultsDir: reportPath + '/allure'
+        }));
+        jasmine.getEnv().afterEach((done) => {
+            browser.takeScreenshot().then((png) => {
+                allure.createAttachment('Screenshot', () => {
+                    return new Buffer(png, 'base64');
+                }, 'image/png')();
+                done();
+            });
+        });
+
+    }
+};
+
+
+b) Installing Allure Framework:
+
+The allure framework needs to be installed on your system. To install on Centos7, use the manual installation from their documentation. At the time of writing, the current version is 2.12.1, and can be downloaded from:
+
+http://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/
+
+Download allure-commandline-2.12.1-tgz
+
+$ cd ~{user}/local/src
+
+$ tar -zxvf ~{user}/Downloads/allure-commandline-2.12.1-tgz
+
+$ cd
+
+$ vi .bash_profile
+
+...
+
+ALLURE_HOME=/home/{user}/local/src/allure-2.12.1
+export $PATH=$PATH:$ALLURE_HOME/bin
+
+esc :wq
+
+$ source .bash_profile
+
+$ allure --version
+2.12.1
+
+
+c) Viewing the generated report using Allure
+
+After running your Protractor tests, using the allure reporter configured above. A directory will be created to store the allure report xml file. To view the Allure report from the command line, just pass this directory to the 'serve' command line argument.
+
+$ allure serve ~{user}/local/src/{project}/target/e2e/allure
+
+The allure server will start and a new browser tab will open to display the results.
+
+http://192.168.2.18:40444/index.html
+
