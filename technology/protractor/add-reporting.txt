@@ -4,7 +4,9 @@
  * Original Publication Date: July 9, 2019
  */
 
-Having installed Protractor, and running the first spec file the native console output is quite bland. Lets add some reporting to help in viewing tests and enable continuous integration systems like Jenkins consume Protractor tests results.
+Having installed Protractor, and running the first spec file the native console output is quite bland. Lets add some
+reporting to help in viewing tests and enable continuous integration systems like Jenkins consume Protractor tests
+results.
 
 The following changes are done in the Protractor configuration file, commonly named: protractor.config.js
 

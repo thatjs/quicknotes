@@ -8,7 +8,9 @@ Install Protractor test automation for non-Angular applications.
 
 Protractor can be used for any web application or website where a system level test is desired to automate functionality. It was designed and documented specifically for the Angular framework, however is easily configured for web applications using any tech stack.
 
-The only requirement for executing Protractor tests is NodeJs, an operating system that contains a GUI, and a modern browser. Different documentation suggests Protractor will not execute on any version of NodeJs greater than 6.9, however I have not seen any problems on Centos7 using NodeJs version 8.11.3
+The only requirement for executing Protractor tests is NodeJs, an operating system that contains a GUI, and a modern
+browser. Different documentation suggests Protractor will not execute on any version of NodeJs greater than 6.9,
+however I have not seen any problems on Centos7 using NodeJs version 8.11.3
 
 
 1. Pre-Requisites

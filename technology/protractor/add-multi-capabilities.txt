@@ -1,0 +1,166 @@
+/* Copyright (C) ThatJs, 2019
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Original Publication Date: July 12, 2019
+ */
+
+Having installed Protractor, and given time, the number of specs increases. In situations where the number of tests
+passes 500 - 1000, the time to complete all tests can stretch into hours. One built-in mechanism to deal with this
+problem, is to run tests in parallel using the Protractor configuration for multi-capabilities.
+
+The topic of multi-capabilities is not strictly limited to parallel vs serial (default) execution. It also provides
+the opportunity to run tests in different browsers at the same time. The configuration typically is coded as a static
+array of capability instances inside the protractor.config.js file, however this quicknote will go further and
+document a strategy to drive the multi-capabilities from configuration.
+
+The reason to drive multi-capabilities from a configuration file, is that your protractor.config.js can be intelligent
+and can decide from command line arguments whether to run all tests in parallel or serial, run in one and/or multiple
+browsers, and execute all or a single test.
+
+1. Define your suites in a custom configuration file
+----------------------------------------------------
+
+$ cd path/to/project
+
+$ mkdir -p config/protractor
+
+$ vi config/protractor/suites.json
+
+Copy and paste the following:
+
+{
+    "suites": {
+        "one": "test/system/index.one.spec.js",
+        "two": "test/system/index.two.spec.js",
+        "three": "test/system/index.three.spec.js"
+    },
+    "executions": {
+        "parallel": [{
+            "suites": ["one"]
+        }, {
+            "suites": ["two"]
+        }, {
+            "suites": ["three"]
+        }]
+    }
+}
+
+This design places all Protractor suite declarations into the top 'suites' section. Multi-capabilities configuration is
+then located in the 'executions' section. Each instance of 'parallel' is a configured array of suite names and will use
+a helper function to build out the syntax needed in the protractor.config.js file.
+
+
+2. Add protractor.multi.config.js to consume multi-capabilities
+---------------------------------------------------------------
+
+Creating a separate Protractor configuation file for multi-capabilities may be easier to grasp the concepts, yet it is
+perfectly suitable to extend a single configuration file using command line flags to change the execution behavior. For
+the purpose of this quicknote, we will use a separate file.
+
+Create a new Protractor configuration file and copy the following code:
+
+
+'use strict';
+
+let colors = require('ansi-colors'),
+    browser = 'chrome',
+    fs = require('fs'),
+    log = require('fancy-log'),
+    mkdirp = require('mkdirp'),
+    reporter = {
+        allure: require('jasmine-allure-reporter'),
+        console: require('jasmine-spec-reporter').SpecReporter,
+        html: require('protractor-jasmine2-html-reporter'),
+        xml: require('jasmine-reporters').JUnitXmlReporter
+    };
+
+let reportPath = __dirname + '/target/e2e';
+
+let suites = require('config/protractor/suites.json');
+
+let tasks = {};
+tasks.protractor = require('config/tasks/protractor');
+
+...
+
+exports.config = {
+    seleniumAddress: 'http://localhost:4444/wd/hub',
+    multiCapabilities: tasks.protractor.buildParallelCapabilities(suites, browser),
+    onPrepare: () => {
+        ...
+    }
+};
+
+
+
+3. Write a helper function to assemble the multi-capabilities
+-------------------------------------------------------------
+
+$ cd path/to/project
+
+$ mkdir -p config/tasks
+
+$ vi config/tasks/protractor.js
+
+Copy and paste the following code:
+
+
+'use strict';
+
+let colors = require('colors');
+let log = require('fancy-log');
+
+function buildParallelSpecs(specs, suites) {
+    let parallelSpecs = [];
+    let len = specs.length;
+
+    // iterate over suite names and add to array
+    for (let i = 0; i < len; i++) {
+        parallelSpecs.push(suites[specs[i]]);
+    }
+
+    return parallelSpecs;
+}
+
+function buildParallelCapabilities(suites, browserName) {
+    let multiCapabilities = [];
+    let parallel = suites.executions.parallel;
+    let len = parallel.length;
+    let specs;
+
+    browserName = browserName || 'chrome';
+
+    for (let i = 0; i < len; i++) {
+        // each item is an array of suite names
+        specs = parallel[i];
+
+        multiCapabilities.push({
+            browserName: browserName,
+            shardTestFiles: true,
+            maxInstances: 1,
+            sequential: true,
+            specs: buildParallelSpecs(specs, suites)
+        });
+    }
+
+    return multiCapabilities;
+}
+
+exports.buildParallelCapabilities = buildParallelCapabilities;
+
+
+4. Executing Protractor tests
+-----------------------------
+
+Using our command line, we can now execute our 3 parallel tests sections:
+
+$ protractor protractor.multi.config.js
+
+
+5. Tips on parallel exections
+-----------------------------
+
+Parallel execution of tests does require some though to how tests are organized and the test design itself. It is
+a best practice to divide tests into functional areas that do not overlap. Tests that overlap, can interfere
+with each other and trigger false positives. It is also worth noting that tests should clean up after themselves,
+and not leave data behind.
