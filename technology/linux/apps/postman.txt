@@ -1,0 +1,59 @@
+/* Copyright (C) ThatJs, 2019
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Date: December 27, 2019
+ */
+
+Postman - Open source api design and development tool.
+
+As we are installing on Centos7, I prefer to install tools in /usr/local/src which I have made writable by my local user, however any directory will work.
+
+
+1. Download tar file
+--------------------
+https://dl.pstmn.io/download/latest/linux64
+
+
+2. Expand tar file
+------------------
+
+$ cd /usr/local/src
+$ mkdir postman
+$ cd postman
+
+$ tar -zxvf ~user/Downloads/Postman-linux-x64-7.14.0.tar.gz
+$ ls -la
+drwxr-xr-x. 4 user user 4096 Dec 18 00:48 app
+drwxr-xr-x. 2 user user   21 Dec 27 16:27 Postman
+
+
+3. Create a desktop file to launch Postman
+------------------------------------------
+
+vi ~user/.local/share/applications/Postman.desktop
+
+[Desktop Entry]
+Encoding=UTF-8
+Name=Postman
+Exec=/usr/local/src/postman/app/Postman %U
+Icon=/usr/local/src/postman/app/resources/app/assets/icon.png
+Terminal=false
+Type=Application
+Categories=Development;
+
+:wq
+
+Desktop Icon will appear in the Programming folder
+
+
+4. Launch application
+---------------------
+Application -> Programming -> Postman
+
+Create Account:
+
+Email: {email@domain.ext}
+Username: {username}
+Password {passwd}
+
+!! success !!
