@@ -1,0 +1,316 @@
+/* Copyright (C) ThatJs, 2020
+ *
+ * Author: Andrew Schoenherr <dev@thatjs.com>
+ * Date: August 30, 2020
+ */
+
+Apache Web Server
+
+CentOS 7 comes bundled with the Apache.
+
+1. Verify current libraries
+---------------------------
+
+$ rpm -qa | grep httpd
+httpd-2.4.6-93.el7.centos.x86_64
+httpd-manual-2.4.6-93.el7.centos.noarch
+httpd-devel-2.4.6-93.el7.centos.x86_64
+httpd-tools-2.4.6-93.el7.centos.x86_64
+
+# httpd -v
+Server version: Apache/2.4.6 (CentOS)
+Server built:   Apr  2 2020 13:13:23
+
+2. Check the latest version of Apache
+--------------------------------------
+# yum info httpd
+
+Installed Packages
+Name        : httpd
+Arch        : x86_64
+Version     : 2.4.6
+Release     : 93.el7.centos
+Size        : 9.4 M
+Repo        : installed
+From repo   : base
+Summary     : Apache HTTP Server
+URL         : http://httpd.apache.org/
+License     : ASL 2.0
+Description : The Apache HTTP Server is a powerful, efficient, and extensible
+            : web server.
+
+
+3. Install Epel to allow installing of latest releases
+------------------------------------------------------
+# yum install epel-release
+
+Package epel-release-7-12.noarch already installed and latest version
+Nothing to do
+
+
+4. Backup original httpd folder
+-------------------------------
+# cd /etc
+# cp -r httpd httpd.bak
+
+
+5. Register the Yum repository for Apache
+-----------------------------------------
+# cd /etc yum.repos.d
+# wget https://repo.codeit.guru/codeit.el7.repo
+
+
+6. Verify package is available
+------------------------------
+# yum info httpd
+
+Installed Packages
+Name        : httpd
+Arch        : x86_64
+Version     : 2.4.6
+Release     : 93.el7.centos
+Size        : 9.4 M
+Repo        : installed
+From repo   : base
+Summary     : Apache HTTP Server
+URL         : http://httpd.apache.org/
+License     : ASL 2.0
+Description : The Apache HTTP Server is a powerful, efficient, and extensible
+            : web server.
+
+Available Packages
+Name        : httpd
+Arch        : x86_64
+Version     : 2.4.46
+Release     : 1.codeit.el7
+Size        : 1.4 M
+Repo        : CodeIT/x86_64
+Summary     : Apache HTTP Server
+URL         : https://httpd.apache.org/
+License     : ASL 2.0
+Description : The Apache HTTP Server is a powerful, efficient, and extensible
+            : web server.
+
+
+7. Update the package
+---------------------
+
+# yum update httpd
+
+...
+Dependency Installed:
+  brotli.x86_64 0:1.0.7-5.el7  httpd-filesystem.noarch 0:2.4.46-1.codeit.el7  libnghttp2.x86_64 0:1.33.0-1.1.el7  mod_http2.x86_64 0:1.15.14-1.codeit  openssl111-libs.x86_64 0:1.1.1g-2.codeit.el7
+  sscg.x86_64 0:2.6.1-1.el7
+
+Updated:
+  httpd.x86_64 0:2.4.46-1.codeit.el7
+
+Dependency Updated:
+  apr.x86_64 0:1.7.0-2.el7                         apr-devel.x86_64 0:1.7.0-2.el7                   apr-util.x86_64 0:1.6.1-6.el7                     apr-util-devel.x86_64 0:1.6.1-6.el7
+  apr-util-openssl.x86_64 0:1.6.1-6.el7            httpd-devel.x86_64 0:2.4.46-1.codeit.el7         httpd-manual.noarch 0:2.4.46-1.codeit.el7         httpd-tools.x86_64 0:2.4.46-1.codeit.el7
+  mod_session.x86_64 0:2.4.46-1.codeit.el7         mod_ssl.x86_64 1:2.4.46-1.codeit.el7
+
+Complete!
+
+
+8. Verify Package
+-----------------
+# yum info httpd
+
+Installed Packages
+Name        : httpd
+Arch        : x86_64
+Version     : 2.4.46
+Release     : 1.codeit.el7
+Size        : 4.2 M
+Repo        : installed
+From repo   : CodeIT
+Summary     : Apache HTTP Server
+URL         : https://httpd.apache.org/
+License     : ASL 2.0
+Description : The Apache HTTP Server is a powerful, efficient, and extensible
+            : web server.
+
+# httpd -v
+Server version: Apache/2.4.46 (codeit)
+Server built:   Aug  7 2020 15:21:08
+
+9. Start Apache
+---------------
+# systemctl start httpd
+Job for httpd.service failed because the control process exited with error code. See "systemctl status httpd.service" and "journalctl -xe" for details.
+
+
+# systemctl status httpd.service
+● httpd.service - The Apache HTTP Server
+   Loaded: loaded (/usr/lib/systemd/system/httpd.service; disabled; vendor preset: disabled)
+   Active: failed (Result: exit-code) since Tue 2020-08-25 20:37:20 PDT; 15s ago
+     Docs: man:httpd.service(8)
+  Process: 5637 ExecStart=/usr/sbin/httpd $OPTIONS -DFOREGROUND (code=exited, status=1/FAILURE)
+ Main PID: 5637 (code=exited, status=1/FAILURE)
+   Status: "Reading configuration..."
+
+Aug 25 20:37:20 machine.server systemd[1]: Starting The Apache HTTP Server...
+Aug 25 20:37:20 machine.server httpd[5637]: AH00526: Syntax error on line 31 of /etc/httpd/conf.d/php.conf:
+Aug 25 20:37:20 machine.server httpd[5637]: Invalid command 'php_value', perhaps misspelled or defined by a module not included in the server configuration
+Aug 25 20:37:20 machine.server systemd[1]: httpd.service: main process exited, code=exited, status=1/FAILURE
+Aug 25 20:37:20 machine.server systemd[1]: Failed to start The Apache HTTP Server.
+Aug 25 20:37:20 machine.server systemd[1]: Unit httpd.service entered failed state.
+Aug 25 20:37:20 machine.server systemd[1]: httpd.service failed.
+
+
+10. Fix php.conf file
+---------------------
+# cd /etc/httpd/conf.d/
+# cat php.conf | grep php_value
+php_value session.save_handler "files"
+php_value session.save_path    "/var/lib/php/session"
+
+# vi php.conf
+#php_value session.save_handler "files"
+#php_value session.save_path    "/var/lib/php/session"
+:wq
+
+
+11. Restart
+-----------
+# systemctl start httpd
+
+Error:
+Job for httpd.service failed because the control process exited with error code. See "systemctl status httpd.service" and "journalctl -xe" for details.
+
+# cd /var/log/httpd
+
+[user@machine httpd]# ls
+access_log  error_log  ssl_access_log  ssl_error_log  ssl_request_log
+
+[user@machine httpd]# cat error_log
+
+[Tue Aug 25 19:54:59.362008 2020] [core:notice] [pid 13709] SELinux policy enabled; httpd running as context unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
+[Tue Aug 25 19:54:59.464453 2020] [suexec:notice] [pid 13709] AH01232: suEXEC mechanism enabled (wrapper: /usr/sbin/suexec)
+[Tue Aug 25 19:54:59.804557 2020] [lbmethod_heartbeat:notice] [pid 13715] AH02282: No slotmem from mod_heartmonitor
+[Tue Aug 25 19:55:00.205103 2020] [mpm_prefork:notice] [pid 13715] AH00163: Apache/2.4.6 (CentOS) OpenSSL/1.0.2k-fips mod_auth_gssapi/1.5.1 mod_fcgid/2.3.9 mod_nss/1.0.14 NSS/3.28.4 PHP/5.4.16 mod_wsgi/3.4 Python/2.7.5 configured -- resuming normal operations
+[Tue Aug 25 19:55:00.205141 2020] [core:notice] [pid 13715] AH00094: Command line: 'httpd'
+
+
+12. Reboot
+----------
+
+After getting the error in #11, I rebooted the machine
+
+# systemctl start httpd
+# systemctl status httpd
+
+● httpd.service - The Apache HTTP Server
+   Loaded: loaded (/usr/lib/systemd/system/httpd.service; disabled; vendor preset: disabled)
+   Active: active (running) since Wed 2020-08-26 19:41:27 PDT; 8s ago
+     Docs: man:httpd.service(8)
+ Main PID: 6131 (httpd)
+   Status: "Started, listening on: port 443, port 8443, ..."
+    Tasks: 216
+   CGroup: /system.slice/httpd.service
+           ├─6131 /usr/sbin/httpd -DFOREGROUND
+           ├─6152 /usr/libexec/nss_pcache 3 off
+           ├─6154 /usr/sbin/httpd -DFOREGROUND
+           ├─6155 /usr/sbin/httpd -DFOREGROUND
+           ├─6158 /usr/sbin/httpd -DFOREGROUND
+           ├─6162 /usr/sbin/httpd -DFOREGROUND
+           └─6163 /usr/sbin/httpd -DFOREGROUND
+
+Aug 26 19:41:25 machine.server systemd[1]: Starting The Apache HTTP Server...
+Aug 26 19:41:27 machine.server httpd[6131]: Server configured, listening on: port 443, port 8443, ...
+Aug 26 19:41:27 machine.server systemd[1]: Started The Apache HTTP Server.
+
+
+!! Done !!
+
+
+13. Setup VHosts for development
+--------------------------------
+
+Apache has a lot of features that make web development simple. Virtual hosts allow you to configure
+multiple web sites, or applications running from different physical directories that can be mapped to
+your hosts file, or routed through a local instance of BindDNS.
+
+# cd /etc/httpd/conf.d
+# vi vhosts.conf
+
+<VirtualHost *:80>
+    ServerName yourdomain
+    ServerAlias *.yourdomain
+    DocumentRoot /pub/sites/yourdomain.com/
+
+    ServerAdmin user@yourdomain.com
+    ErrorLog /var/log/httpd/yourdomain-error_log
+    CustomLog /var/log/httpd/yourdomain-access_log combined
+    <Directory /pub/sites/yourdomain.com>
+        Options Indexes FollowSymLinks
+        AllowOverride None
+        Order allow,deny
+        Allow from all
+    </Directory>
+    <IfModule dir_module>
+        DirectoryIndex index.html index.php
+    </IfModule>
+</VirtualHost>
+
+:wq
+
+
+14. Add host entries
+--------------------
+
+# cd /etc
+# vi hosts
+
+127.0.0.1 yourdomain
+
+
+15. Use a group for permissions
+-------------------------------
+
+As you add applications to your system, it becomes handy to create a group to manage
+access to different physical directories.
+
+# cd /etc
+# groupadd work
+# cat group
+...
+work:x:1001
+
+# usermod -aG work user
+# usermod -aG work apache
+
+# cat group
+...
+work:x:1001:user,apache
+
+
+16. SELinux Settings
+--------------------
+
+There are different approaches to setting up development files, some prefer to keep all work
+under the home directory. I have found it is easier to manage all web files under one main
+folder on root.
+
+# cd /
+# mkdir -p pub/sites
+# cd pub
+
+Move all of web development files, sites and directories under pub/sites.
+
+# ls -lZ
+drwxrwxr-x. user work unconfined_u:object_r:user_home_t:s0 sites
+
+# chcon -R -t public_content_rw_t /pub
+# ls -lZ
+drwxrwxr-x. user work unconfined_u:object_r:public_content_rw_t:s0 sites
+
+Now all files under /pub/sites will be writable by you, and accessible by Apache.
+
+
+
+
+
+
+
